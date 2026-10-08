@@ -146,14 +146,18 @@ rm -f "$TMP"
 
 echo "== waiting for the new revision to become ready"
 for i in $(seq 1 30); do
-  LATEST=$(az containerapp show -g "$RG" -n "$APP" --query properties.latestRevisionName -o tsv)
-  READY=$(az containerapp show -g "$RG" -n "$APP" --query properties.latestReadyRevisionName -o tsv)
+  read -r LATEST READY < <(az containerapp show -g "$RG" -n "$APP" --only-show-errors \
+    --query "[properties.latestRevisionName, properties.latestReadyRevisionName]" -o tsv | tr '\n' ' ')
   [ "$LATEST" = "$READY" ] && break
+  printf '.'
   sleep 10
 done
+echo
 if [ "$LATEST" != "$READY" ]; then
   echo "DEPLOY FAILED: revision $LATEST never became ready; $READY is still serving. Recent system log:"
-  az containerapp logs show -g "$RG" -n "$APP" --type system --tail 40 2>/dev/null || true
+  az containerapp logs show -g "$RG" -n "$APP" --type system --tail 40 --only-show-errors 2>/dev/null || true
+  echo "Recent console log (the app's own output):"
+  az containerapp logs show -g "$RG" -n "$APP" --type console --tail 40 --only-show-errors 2>/dev/null || true
   exit 1
 fi
 
