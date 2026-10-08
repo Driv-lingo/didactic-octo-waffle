@@ -7,6 +7,8 @@ def test_web_flow_offline(tmp_path):
     app = create_app(db=tmp_path / "w.db", learner="web", offline=True, token="")
     c = TestClient(app)
     assert c.get("/healthz").json()["ok"]
+    sm = c.get("/smoke").json()
+    assert sm["ok"] is False and "offline" in sm["error"]
     r = c.get("/")
     assert r.status_code == 200 and "Enroll" in r.text
     assert c.post("/enroll", follow_redirects=False).status_code == 303

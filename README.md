@@ -57,7 +57,8 @@ secrets. It needs a logged-in `az` CLI and nothing else.
 ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
 ```
 
-It prints the URL when done. Re-running updates the app in place. The container also runs
+It prints the URL when done. Open `<url>/smoke` (after logging in with the token) to make one
+real model call and confirm the faculty works. Re-running the script updates the app in place. The container also runs
 anywhere else that takes a Dockerfile; set `MINIMUM_DB` to a path on a persistent volume and
 `MINIMUM_TOKEN` to gate the browser.
 

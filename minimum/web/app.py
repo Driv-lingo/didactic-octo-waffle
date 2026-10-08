@@ -81,6 +81,19 @@ def create_app(
     def healthz():
         return {"ok": True, "course": bundle.course.id, "offline": offline}
 
+    @app.get("/smoke")
+    def smoke():
+        """One real model call, behind the token. Proves credentials, model, and structured outputs."""
+        if offline:
+            return {"ok": False, "error": "offline faculty; no model is connected"}
+        try:
+            from ..smoke import run_smoke
+
+            result = run_smoke()
+        except Exception as exc:  # noqa: BLE001 - surface anything, this is a diagnostic
+            return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+        return {"ok": bool(result.get("answer_correct")), **result}
+
     @app.get("/", response_class=HTMLResponse)
     def dashboard(request: Request):
         if orch.store.learner(learner) is None:
