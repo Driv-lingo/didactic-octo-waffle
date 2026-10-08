@@ -3,19 +3,24 @@
 #
 # Prerequisites: az CLI logged in (az login). Docker is not required; the image is built in Azure Container Registry.
 # Usage:
-#   ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
+#   first time:  ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
+#   later:       ./deploy/azure.sh          (secrets stay as stored; set one to replace it)
 # Optional env: RG, LOCATION, APP, ENV_NAME, STORAGE, MINIMUM_MODEL, MINIMUM_LEARNER
 #
 # Re-running the script updates the app in place.
 set -euo pipefail
 
-: "${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY}"
-: "${MINIMUM_TOKEN:?set MINIMUM_TOKEN (the browser access token)}"
-case "$ANTHROPIC_API_KEY" in
-  sk-ant-??????????*) ;;
-  *) echo "ANTHROPIC_API_KEY does not look like a real key (expected sk-ant-... followed by many characters). Get one at https://console.anthropic.com/settings/keys"; exit 1 ;;
-esac
-if [ "${#MINIMUM_TOKEN}" -lt 16 ] || [ "$MINIMUM_TOKEN" = "..." ]; then
+# Secrets are stored in Azure on the first deploy. On reruns, leave ANTHROPIC_API_KEY and
+# MINIMUM_TOKEN unset to keep the stored values, or set one to replace it.
+ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}"
+MINIMUM_TOKEN="${MINIMUM_TOKEN:-}"
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+  case "$ANTHROPIC_API_KEY" in
+    sk-ant-??????????*) ;;
+    *) echo "ANTHROPIC_API_KEY does not look like a real key (expected sk-ant-... followed by many characters). Get one at https://console.anthropic.com/settings/keys"; exit 1 ;;
+  esac
+fi
+if [ -n "$MINIMUM_TOKEN" ] && { [ "${#MINIMUM_TOKEN}" -lt 16 ] || [ "$MINIMUM_TOKEN" = "..." ]; }; then
   echo "MINIMUM_TOKEN must be a real secret of at least 16 characters. Make one with: export MINIMUM_TOKEN=\$(openssl rand -hex 24)"; exit 1
 fi
 
@@ -108,7 +113,17 @@ else
 fi
 
 echo "== secrets and volume"
-az containerapp secret set -g "$RG" -n "$APP" --secrets "anthropic-api-key=$ANTHROPIC_API_KEY" "minimum-token=$MINIMUM_TOKEN" --only-show-errors >/dev/null
+HAVE=$(az containerapp secret list -g "$RG" -n "$APP" --query "[].name" -o tsv 2>/dev/null | tr '\n' ' ')
+SECRETS=()
+if [ -n "$ANTHROPIC_API_KEY" ]; then SECRETS+=("anthropic-api-key=$ANTHROPIC_API_KEY"); fi
+if [ -n "$MINIMUM_TOKEN" ]; then SECRETS+=("minimum-token=$MINIMUM_TOKEN"); fi
+case " $HAVE " in *" anthropic-api-key "*) ;; *) [ -n "$ANTHROPIC_API_KEY" ] || { echo "First deploy needs ANTHROPIC_API_KEY set."; exit 1; } ;; esac
+case " $HAVE " in *" minimum-token "*) ;; *) [ -n "$MINIMUM_TOKEN" ] || { echo "First deploy needs MINIMUM_TOKEN set (export MINIMUM_TOKEN=\$(openssl rand -hex 24))."; exit 1; } ;; esac
+if [ "${#SECRETS[@]}" -gt 0 ]; then
+  az containerapp secret set -g "$RG" -n "$APP" --secrets "${SECRETS[@]}" --only-show-errors >/dev/null
+else
+  echo "   keeping the stored API key and access token"
+fi
 az containerapp update -g "$RG" -n "$APP" \
   --set-env-vars "ANTHROPIC_API_KEY=secretref:anthropic-api-key" "MINIMUM_TOKEN=secretref:minimum-token" --only-show-errors >/dev/null
 
@@ -144,7 +159,7 @@ fi
 
 URL="https://$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)"
 echo
-echo "Deployed commit $BUILD. Open: $URL/?token=$MINIMUM_TOKEN"
+if [ -n "$MINIMUM_TOKEN" ]; then echo "Deployed commit $BUILD. Open: $URL/?token=$MINIMUM_TOKEN"; else echo "Deployed commit $BUILD. Open: $URL  (your existing token still works)"; fi
 echo "Check:         curl -s $URL/healthz   (the build field must read $BUILD)"
 echo "Health:        $URL/healthz"
 echo "Logs:          az containerapp logs show -g $RG -n $APP --follow"
