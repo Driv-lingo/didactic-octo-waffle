@@ -1,9 +1,9 @@
 # The Minimum
 
 A self-contained, mastery-gated program that takes a learner from a beginner start to the
-standard of a PhD qualifying exam in two anchor fields and first-year graduate level in six
+standard of a PhD qualifying exam in two anchor fields and first-year graduate level in seven
 others: physics, chemistry, computer science, electrical engineering, mechanical engineering,
-biomedical engineering, biology, and mathematics. There is no human faculty. The faculty is a
+biomedical engineering, biology, mathematics, and operations research. There is no human faculty. The faculty is a
 set of AI agents designed to be adversarial toward each other and unimpressed by the learner.
 
 The name is borrowed from Landau's Theoretical Minimum, the exam sequence that took entrants
@@ -173,7 +173,7 @@ examiner, which is the one seam the engine does not yet have.
 ## Status
 
 Built and tested: the engine, the faculty with isolation and verification, deterministic
-grading, mastery gates, retrieval, the CLI, the web front end, the container, and a 77-problem
+grading, mastery gates, retrieval, the CLI, the web front end, the container, and an 87-problem
 bank covering every module that feeds a gate. Not yet done: a run against a live model (this
 build environment had no credentials; `minimum smoke` is the first thing to run), a larger
 bank (a real gate needs hundreds of problems per phase so attempts stay fresh), audio for oral

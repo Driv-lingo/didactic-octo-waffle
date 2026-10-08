@@ -1,0 +1,217 @@
+- id: p2.optim.001
+  module: p2.optim
+  kind: numeric
+  difficulty: 3
+  statement: |
+    Maximise 3x + 2y subject to x + y <= 4, x + 3y <= 6, x >= 0, y >= 0. Find the optimal value,
+    identify the optimal vertex, and write down the dual problem and its optimal solution as a check.
+    End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 12
+    abs_tol: 0
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Enumerates the vertices (0,0), (4,0), (3,1), (0,2) and evaluates the objective, or runs simplex correctly" }
+    - { points: 3, criterion: "Writes the dual min 4u + 6v s.t. u + v >= 3, u + 3v >= 2, u, v >= 0 and finds u = 3, v = 0 with value 12, confirming strong duality" }
+  reference_solution: |
+    Vertices: (0,0) -> 0, (4,0) -> 12, (3,1) -> 11, (0,2) -> 4. Optimum 12 at (4,0). Dual: min 4u + 6v
+    with u + v >= 3, u + 3v >= 2; u = 3, v = 0 is feasible with value 12, matching the primal.
+    ANSWER: 12
+  concepts: [LP standard form and polyhedra, LP duality and complementary slackness]
+
+- id: p2.optim.002
+  module: p2.optim
+  kind: proof
+  difficulty: 4
+  statement: |
+    State the primal LP max c^T x subject to Ax <= b, x >= 0 and its dual. Prove weak duality, and
+    show that if a primal feasible x and a dual feasible y have equal objective values then both are optimal.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "States the dual correctly: min b^T y subject to A^T y >= c, y >= 0" }
+      - { points: 4, criterion: "Proves c^T x <= y^T A x <= y^T b using x >= 0, A^T y >= c, y >= 0, Ax <= b, with each inequality justified" }
+      - { points: 3, criterion: "Concludes optimality from equality: no primal feasible point can exceed any dual value, so x attains the primal maximum and y the dual minimum" }
+      - { points: 1, criterion: "Notes that strong duality (equality always holds when both are feasible) requires more, e.g. Farkas' lemma" }
+  reference_solution: |
+    Dual: min b^T y s.t. A^T y >= c, y >= 0. For feasible x, y: c^T x <= (A^T y)^T x = y^T A x <= y^T b,
+    the first because x >= 0 and A^T y >= c, the second because y >= 0 and Ax <= b. If c^T x = b^T y,
+    then every primal feasible x' has c^T x' <= b^T y = c^T x, so x is optimal, and symmetrically y.
+    Strong duality needs Farkas' lemma or the simplex termination argument.
+  concepts: [LP duality and complementary slackness]
+
+- id: p2.optim.003
+  module: p2.optim
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Minimise x^2 + y^2 subject to x + y = 1. Solve it with the KKT conditions and verify that the
+    point found is a global minimum. End with "ANSWER: <minimum value>".
+  answer:
+    type: symbolic
+    expr: "1/2"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Forms the Lagrangian and the stationarity conditions 2x = lambda, 2y = lambda, so x = y, with the constraint giving x = y = 1/2" }
+    - { points: 2, criterion: "Argues global optimality: the objective is strictly convex and the constraint is affine, so the KKT point is the unique minimiser" }
+  reference_solution: |
+    L = x^2 + y^2 - lambda (x + y - 1). Stationarity: 2x = lambda = 2y, so x = y = 1/2, lambda = 1.
+    Strictly convex objective, affine constraint: KKT is sufficient, and the minimum value is 1/2.
+    ANSWER: 1/2
+  concepts: [KKT conditions and Lagrangian duality, convex sets and convex functions]
+
+- id: p2.optim.004
+  module: p2.optim
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Gradient descent with fixed step t is applied to f(x) = (a/2) x^2 with a > 0. Find the iteration
+    map and the largest step size for which the iterates converge from every starting point.
+    End with "ANSWER: <expression in a>".
+  answer:
+    type: symbolic
+    expr: "2/a"
+    symbols: [a]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Derives x_{k+1} = (1 - t a) x_k" }
+    - { points: 2, criterion: "Convergence iff |1 - t a| < 1, i.e. 0 < t < 2/a; notes t = 1/a converges in one step" }
+  reference_solution: |
+    f'(x) = a x, so x_{k+1} = x_k - t a x_k = (1 - t a) x_k. Converges iff |1 - t a| < 1, i.e. 0 < t < 2/a.
+    The supremum of admissible steps is 2/a (not attained); t = 1/a reaches the minimiser in one step.
+    ANSWER: 2/a
+  concepts: [gradient descent and Newton's method]
+
+- id: p2.optim.005
+  module: p2.optim
+  kind: model
+  difficulty: 5
+  statement: |
+    A company must choose which of m candidate warehouses to open (fixed cost f_i each) to serve n
+    customers (demand d_j; unit shipping cost c_ij from warehouse i to customer j; capacity K_i).
+    Formulate this as a mixed-integer linear program, explain why the linear relaxation can be weak,
+    and describe how branch and bound would solve it, including what bound it uses at each node.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Variables y_i in {0,1} for opening, x_ij >= 0 for flow; objective sum f_i y_i + sum c_ij x_ij; demand constraints sum_i x_ij = d_j; capacity sum_j x_ij <= K_i y_i" }
+      - { points: 2, criterion: "Explains weak relaxation: fractional y_i lets a warehouse be 'partly open' at a fraction of its fixed cost; stronger with the disaggregated constraints x_ij <= d_j y_i" }
+      - { points: 3, criterion: "Branch and bound: solve the LP relaxation at each node for a lower bound, branch on a fractional y_i, prune a node when its bound exceeds the best integer solution found" }
+      - { points: 2, criterion: "States the worst-case exponential tree and why good bounds and a good incumbent matter in practice" }
+  reference_solution: |
+    min sum_i f_i y_i + sum_ij c_ij x_ij s.t. sum_i x_ij = d_j for all j, sum_j x_ij <= K_i y_i for all i,
+    x >= 0, y binary. Relaxing y to [0,1] lets y_i = (sum_j x_ij)/K_i, paying only a fraction of f_i,
+    so the bound is weak; adding x_ij <= d_j y_i tightens it. Branch and bound solves the relaxation at
+    each node for a lower bound, branches on a fractional y_i into y_i = 0 and y_i = 1 subproblems, and
+    prunes any node whose bound is no better than the incumbent. The tree is exponential in the worst case.
+  concepts: [integer programming and branch and bound, LP standard form and polyhedra]
+
+- id: p3.or.001
+  module: p3.or
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    For an M/M/1 queue with arrival rate lam and service rate mu > lam, derive the stationary
+    distribution and the mean number in the system L. End with "ANSWER: <expression in lam, mu>".
+  answer:
+    type: symbolic
+    expr: "lam/(mu - lam)"
+    symbols: [lam, mu]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Balance equations give pi_n = (1 - rho) rho^n with rho = lam/mu, valid for rho < 1" }
+    - { points: 2, criterion: "L = sum n pi_n = rho/(1 - rho) computed correctly, and rewritten as lam/(mu - lam)" }
+  reference_solution: |
+    Birth-death balance: lam pi_n = mu pi_{n+1}, so pi_n = rho^n pi_0 with rho = lam/mu and pi_0 = 1 - rho.
+    L = sum_n n (1 - rho) rho^n = rho/(1 - rho) = lam/(mu - lam).
+    ANSWER: lam/(mu - lam)
+  concepts: [birth-death queues and Little's law]
+
+- id: p3.or.002
+  module: p3.or
+  kind: numeric
+  difficulty: 3
+  statement: |
+    A two-state Markov chain has transition matrix P = [[0.9, 0.1], [0.5, 0.5]]. Find the stationary
+    probability of state 2, and state why the chain has a unique stationary distribution.
+    End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 0.1667
+    rel_tol: 0.02
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Solves pi P = pi: 0.1 pi_1 = 0.5 pi_2 with pi_1 + pi_2 = 1, giving pi_2 = 1/6; cites irreducibility and aperiodicity (positive diagonal) for uniqueness" }
+  reference_solution: |
+    Balance: 0.1 pi_1 = 0.5 pi_2, so pi_1 = 5 pi_2, and pi_1 + pi_2 = 1 gives pi_2 = 1/6 = 0.1667.
+    The chain is irreducible and aperiodic (both self-loops positive), so the stationary distribution is unique.
+    ANSWER: 0.1667
+  concepts: [discrete-time Markov chains and stationary distributions]
+
+- id: p3.or.003
+  module: p3.or
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    In the newsvendor problem, each unit costs c, sells for p > c, and unsold units are worthless.
+    Demand has a continuous distribution F. Derive the optimal order quantity in terms of F, and give
+    the critical fractile F(q*) as an expression. End with "ANSWER: <expression in p, c>".
+  answer:
+    type: symbolic
+    expr: "(p - c)/p"
+    symbols: [p, c]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Marginal analysis: the (q+1)th unit earns p - c with probability 1 - F(q) and loses c with probability F(q)" }
+    - { points: 2, criterion: "Sets expected marginal profit to zero: (p - c)(1 - F(q)) = c F(q), so F(q*) = (p - c)/p" }
+  reference_solution: |
+    Expected marginal profit of one more unit: (p - c)(1 - F(q)) - c F(q). Setting it to zero gives
+    F(q*) = (p - c)/p, the critical fractile; q* = F^{-1}((p - c)/p).
+    ANSWER: (p - c)/p
+  concepts: [inventory models and the newsvendor]
+
+- id: p3.or.004
+  module: p3.or
+  kind: proof
+  difficulty: 4
+  statement: |
+    State Little's law and give a proof (a sample-path argument is acceptable) for a system that
+    starts and ends empty over a long horizon. Explain what assumptions the general result needs.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "States L = lambda W with the three quantities defined as long-run averages" }
+      - { points: 4, criterion: "Sample-path argument: the area under the number-in-system curve over [0, T] equals the sum of sojourn times of customers who arrived in [0, T] when the system is empty at both ends; divide by T and use N(T)/T -> lambda" }
+      - { points: 2, criterion: "Identifies the assumptions: the limits defining lambda and W exist and are finite; no distributional assumptions are needed" }
+      - { points: 2, criterion: "Gives one application, e.g. inferring mean waiting time from mean queue length and throughput" }
+  reference_solution: |
+    Little's law: L = lambda W. On [0, T] with the system empty at 0 and T, the integral of the number in
+    system equals the sum of the sojourn times of the N(T) arrivals. Dividing by T:
+    (1/T) int_0^T N(t) dt = (N(T)/T) * (1/N(T)) sum W_i, i.e. L_T = lambda_T W_T. Taking T -> infinity gives
+    L = lambda W whenever the limits exist. Nothing about the arrival or service distributions is assumed.
+  concepts: [birth-death queues and Little's law]
+
+- id: p3.or.005
+  module: p3.or
+  kind: proof
+  difficulty: 5
+  statement: |
+    For a discounted Markov decision process with discount factor gamma in (0, 1), bounded rewards,
+    and finite action sets, define the Bellman optimality operator T and prove that T is a contraction
+    in the sup norm with modulus gamma. Conclude that value iteration converges to the unique optimal
+    value function.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Defines (T V)(s) = max_a [ r(s,a) + gamma sum_{s'} P(s'|s,a) V(s') ]" }
+      - { points: 4, criterion: "Shows |max_a f(a) - max_a g(a)| <= max_a |f(a) - g(a)| and uses it to get |TV - TU|(s) <= gamma sum P(s'|s,a*) |V - U|(s') <= gamma ||V - U||_inf" }
+      - { points: 2, criterion: "Applies the Banach fixed-point theorem on the complete space of bounded functions: unique fixed point V*, and T^k V -> V* geometrically" }
+      - { points: 2, criterion: "Gives the error bound ||V_k - V*|| <= gamma^k ||V_0 - V*|| or the stopping rule from ||V_{k+1} - V_k||" }
+  reference_solution: |
+    (T V)(s) = max_a [ r(s,a) + gamma sum_{s'} P(s'|s,a) V(s') ]. For any s, letting a* attain the max for V,
+    (TV)(s) - (TU)(s) <= gamma sum_{s'} P(s'|s,a*) (V(s') - U(s')) <= gamma ||V - U||_inf, and symmetrically,
+    so ||TV - TU||_inf <= gamma ||V - U||_inf. Bounded functions with the sup norm form a complete space, so
+    by Banach T has a unique fixed point V* and V_k = T^k V_0 satisfies ||V_k - V*|| <= gamma^k ||V_0 - V*||.
+  concepts: [Markov decision processes and value iteration, dynamic programming and Bellman's equation]

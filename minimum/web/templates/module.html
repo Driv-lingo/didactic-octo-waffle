@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% block content %}
-<div class="eyebrow">{{ m.id }} · {{ m.field }} · {{ m.weeks }} weeks</div>
+<div class="eyebrow">{{ m.id }} · {{ m.field }} · {{ m.weeks|num }} weeks</div>
 <h1>{{ m.title }}</h1>
 <p class="prose">{{ m.summary }}</p>
 <div class="actions">
@@ -7,7 +7,7 @@
   <a class="btn secondary" href="/tutor/{{ m.id }}">Talk to the tutor</a>
 </div>
 <h2>Lessons</h2>
-<div class="card flat list">{% for c in m.concepts %}<div style="display:flex; gap:.75rem; align-items:center"><span style="width:1.4rem">{% if c in studied %}<span class="pill good">✓</span>{% elif c in have %}<span class="pill accent">ready</span>{% endif %}</span><a href="/lesson/{{ m.id }}/{{ loop.index0 }}">{{ loop.index }}. {{ c }}</a></div>{% endfor %}</div>
+<div class="card flat list">{% for c in m.concepts %}<div style="display:grid; grid-template-columns:2rem 1fr auto; gap:.75rem; align-items:center"><span class="faint small">{{ loop.index }}</span><a href="/lesson/{{ m.id }}/{{ loop.index0 }}">{{ c }}</a><span>{% if c in studied %}<span class="pill good">studied</span>{% elif c in have %}<span class="pill accent">ready</span>{% else %}<span class="pill">not yet written</span>{% endif %}</span></div>{% endfor %}</div>
 <p class="small faint">Each lesson is written by the faculty and checked by the verifier the first time it is opened, about a minute each. Starting the module writes them all in the background.</p>
 <h2>Outcomes</h2>
 <ul class="prose">{% for o in m.outcomes %}<li>{{ o }}</li>{% endfor %}</ul>

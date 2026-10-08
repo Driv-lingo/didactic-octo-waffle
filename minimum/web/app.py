@@ -11,7 +11,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from ..content import load_course
-from ..day import current_module, load_or_build_day, mark_done, next_concept
+from ..day import current_module, load_or_build_day, mark_done, next_concept, today_key
 from ..gates import GateError, can_attempt
 from ..llm import default_client
 from ..orchestrator import Orchestrator, SolutionLocked
@@ -84,11 +84,22 @@ def create_app(
         app.add_middleware(TokenAuth, token=token)
     templates = Jinja2Templates(directory=str(HERE / "templates"))
     templates.env.filters["md"] = lambda text: _markdown.markdown(text or "", extensions=["fenced_code", "tables"])
+    templates.env.filters["num"] = lambda x: (str(int(x)) if float(x).is_integer() else f"{x:.1f}") if x is not None else ""
 
     def render(request: Request, name: str, **ctx):
         rec = orch.store.learner(learner)
         base = {"request": request, "course": bundle.course, "learner": learner, "enrolled": rec is not None,
-                "offline": offline, "phase_id": rec["current_phase"] if rec else None}
+                "offline": offline, "phase_id": rec["current_phase"] if rec else None,
+                "ctx_phase": None, "ctx_module": None, "ctx_total": 0, "ctx_done": 0}
+        if rec is not None:
+            phase = next((p for p in bundle.course.phases if p.id == rec["current_phase"]), None)
+            base["ctx_phase"] = f"{phase.id} · {phase.title}" if phase else None
+            mid = rec.get("current_module")
+            base["ctx_module"] = bundle.course.module(mid).title if mid else None
+            saved = orch.store.day(learner, today_key())
+            if saved:
+                base["ctx_total"] = sum(st["minutes"] for st in saved["steps"])
+                base["ctx_done"] = sum(st["minutes"] for st in saved["steps"] if st["id"] in set(saved["done"]))
         base.update(ctx)
         return templates.TemplateResponse(request, name, base)
 

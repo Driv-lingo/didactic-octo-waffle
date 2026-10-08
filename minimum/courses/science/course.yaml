@@ -1,8 +1,8 @@
 id: science
 title: The Minimum
-tagline: From zero to the qualifying-exam gate in eight fields, taught entirely by an adversarial AI faculty.
-total_hours: 2000
-expected_months: 18
+tagline: From zero to the qualifying-exam gate in nine fields, taught entirely by an adversarial AI faculty.
+total_hours: 2200
+expected_months: 20
 weekly_hours: 26
 
 modes:
@@ -12,6 +12,7 @@ modes:
   computation: Discrete and computational thinking. Algorithms, complexity, systems, numerical methods. What can be computed and how fast.
   feedback: Feedback and control. Signals, stability, loops, regulation. How systems hold a state or lose it.
   information: Information and evolution. Molecular biology as information processing, selection, replication, error. How living systems came to be and stay alive.
+  optimization: Optimization and decision. Linear and convex optimization, dynamic programming, stochastic models. What is the best achievable, and how to decide under uncertainty.
 
 rules:
   - The standard is the PhD qualifying exam. Undergraduate-level performance is a fail at every gate.
@@ -212,8 +213,8 @@ phases:
 
   - id: p2
     title: The physical sciences at graduate level
-    weeks: 24
-    goal: Classical mechanics, electrodynamics, quantum mechanics, statistical mechanics, and physical chemistry from the standard graduate texts, with algorithms and systems in parallel. Anchor fields are chosen at the end of this phase.
+    weeks: 27
+    goal: Classical mechanics, electrodynamics, quantum mechanics, statistical mechanics, and physical chemistry from the standard graduate texts, with algorithms, systems, and optimization in parallel. Anchor fields are chosen at the end of this phase.
     modules:
       - id: p2.cm
         title: Classical mechanics
@@ -370,10 +371,35 @@ phases:
           - processes, threads, and scheduling
           - locks, races, and deadlock
         prerequisites: [p1.compute]
+      - id: p2.optim
+        title: Linear and convex optimization
+        mode: optimization
+        field: or
+        weeks: 3
+        summary: Linear programming and its geometry, the simplex method, duality and sensitivity, convex sets and functions, the KKT conditions, first- and second-order methods, interior-point methods, and integer programming by branch and bound. The mathematics of the best achievable.
+        outcomes:
+          - Formulate a decision problem as a linear, convex, or integer program and recognise which it is.
+          - State and prove weak and strong LP duality and use complementary slackness.
+          - Derive the KKT conditions and apply them; implement gradient, Newton, and barrier methods and know their convergence behaviour.
+        texts:
+          - { title: Introduction to Linear Optimization, author: Bertsimas and Tsitsiklis, note: "chapters 1-5 for LP, geometry, simplex, duality" }
+          - { title: Convex Optimization, author: Boyd and Vandenberghe, open_access: true, url: "https://web.stanford.edu/~boyd/cvxbook/", note: "chapters 2-5 and 9-11; the book is free" }
+          - { title: Numerical Optimization, author: Nocedal and Wright, note: "for the algorithms in depth" }
+        concepts:
+          - LP standard form and polyhedra
+          - the simplex method
+          - LP duality and complementary slackness
+          - convex sets and convex functions
+          - KKT conditions and Lagrangian duality
+          - gradient descent and Newton's method
+          - interior-point methods
+          - integer programming and branch and bound
+        prerequisites: [p1.linalg, p1.analysis]
+        project: Implement the simplex method and a primal barrier method from scratch, verify both against a library solver on random LPs, and show where each one struggles.
 
   - id: p3
     title: Engineered and living systems
-    weeks: 18
+    weeks: 21
     goal: ECE, ME, and BME at first-year graduate level, built on the physics; biology taught as the statistical physics of information systems; a weekly reproduction of a published result.
     modules:
       - id: p3.signals
@@ -510,6 +536,30 @@ phases:
           - medical imaging physics
         prerequisites: [p3.signals, p3.cellbio, p3.continuum]
         project: Build a sensor, microcontroller, and software device that measures a biological or mechanical quantity, and characterize its noise.
+      - id: p3.or
+        title: Stochastic models and decisions
+        mode: optimization
+        field: or
+        weeks: 3
+        summary: Markov chains, the Poisson process, queues and Little's law, dynamic programming and Markov decision processes, inventory models, and discrete-event simulation. Deciding well when the world is random.
+        outcomes:
+          - Model a system as a Markov chain or queue and compute its stationary behaviour.
+          - Set up a Markov decision process and solve it by value or policy iteration, with a proof that the method converges.
+          - Build a discrete-event simulation, validate it against theory, and use it to optimise a policy with correctly stated uncertainty.
+        texts:
+          - { title: Introduction to Probability Models, author: Ross, note: "chapters 4-8 for Markov chains, Poisson processes, and queues" }
+          - { title: Dynamic Programming and Optimal Control, Vol. 1, author: Bertsekas, note: "chapters 1-2 and 7" }
+          - { title: Introduction to Operations Research, author: Hillier and Lieberman, note: "breadth: inventory, queueing, simulation" }
+        concepts:
+          - discrete-time Markov chains and stationary distributions
+          - the Poisson process
+          - birth-death queues and Little's law
+          - dynamic programming and Bellman's equation
+          - Markov decision processes and value iteration
+          - inventory models and the newsvendor
+          - discrete-event simulation and variance reduction
+        prerequisites: [p1.prob, p2.optim]
+        project: Simulate a two-stage queue, validate it against M/M/1 theory, then find the staffing policy that minimises cost by value iteration and show the simulation agrees.
       - id: p3.repro
         title: Reproduction practicum
         mode: inference
@@ -613,7 +663,7 @@ exams:
     max_questions: 12
   - id: gate2.written
     title: Gate 2 written
-    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.sys]
+    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.sys, p2.optim]
     n_problems: 8
     min_difficulty: 3
     pass_mark: 0.6
@@ -621,7 +671,7 @@ exams:
     cooldown_days: 14
   - id: gate2.oral
     title: Gate 2 oral
-    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.sys]
+    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.sys, p2.optim]
     n_problems: 0
     pass_mark: 1.0
     duration_minutes: 45
@@ -631,7 +681,7 @@ exams:
     max_questions: 15
   - id: gate3.written
     title: Gate 3 written
-    modules: [p3.signals, p3.emdev, p3.continuum, p3.heat, p3.cellbio, p3.physio]
+    modules: [p3.signals, p3.emdev, p3.continuum, p3.heat, p3.cellbio, p3.physio, p3.or]
     n_problems: 6
     min_difficulty: 3
     pass_mark: 0.6
@@ -639,7 +689,7 @@ exams:
     cooldown_days: 14
   - id: gate3.oral
     title: Gate 3 oral
-    modules: [p3.signals, p3.emdev, p3.continuum, p3.heat, p3.cellbio, p3.physio]
+    modules: [p3.signals, p3.emdev, p3.continuum, p3.heat, p3.cellbio, p3.physio, p3.or]
     n_problems: 0
     pass_mark: 1.0
     duration_minutes: 45
@@ -649,7 +699,7 @@ exams:
     max_questions: 15
   - id: final.written
     title: Final written qualifying exams
-    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p3.signals, p3.continuum, p3.cellbio]
+    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.optim, p3.signals, p3.continuum, p3.cellbio, p3.or]
     n_problems: 6
     min_difficulty: 4
     pass_mark: 0.6

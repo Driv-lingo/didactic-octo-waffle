@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% block content %}
 <div class="eyebrow">Today{% if mod %} · <a href="/module/{{ mod.id }}">{{ mod.title }}</a>{% endif %}</div>
-<h1>{% if current %}What to do now{% else %}Day complete{% endif %}</h1>
+<h1>{% if current %}Now{% else %}Day complete{% endif %}</h1>
 <div style="display:flex; align-items:center; gap:1rem; margin:.5rem 0 1.25rem">
   <div class="bar" style="flex:1"><div style="width:{{ (100 * (total - left) / total) if total else 100 }}%"></div></div>
   <span class="small faint" style="white-space:nowrap">{{ total - left }} / {{ total }} min</span>
@@ -22,9 +22,10 @@
 <div class="card flat steps">
 {% for st in steps %}
   <div class="s {% if st.id in done %}done{% elif st == current %}cur{% endif %}">
-    <div class="n">{% if st.id in done %}✓{% else %}{{ loop.index }}{% endif %}</div>
-    <div class="t"><a href="{{ st.url }}">{{ st.title }}</a>{% if st.id not in done and st != current %} <form class="inline" method="post" action="/today/done/{{ st.id }}"><button class="btn ghost sm">done</button></form>{% endif %}<div class="d">{{ st.detail }}</div></div>
+    <div class="n">{{ icon('check' if st.id in done else st.kind) }}</div>
+    <div class="t"><a href="{{ st.url }}">{{ st.title }}</a><div class="d">{{ st.detail }}</div></div>
     <div class="m">{{ st.minutes }} min</div>
+    {% if st.id in done %}<span class="ck spacer"></span>{% else %}<form class="inline" method="post" action="/today/done/{{ st.id }}"><button class="ck" title="Mark done">{{ icon('check') }}</button></form>{% endif %}
   </div>
 {% endfor %}
 </div>

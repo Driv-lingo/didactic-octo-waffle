@@ -12,11 +12,12 @@
       <textarea name="content" class="{% if p.kind.value == 'code' %}code{% endif %}" style="min-height:16rem" placeholder="{% if p.kind.value == 'code' %}Paste your code.{% else %}Show the argument. End with a line: ANSWER: ...{% endif %}"></textarea>
       <div class="actions"><button class="btn">Submit for grading</button><span class="working">Grading and verifying, 10 to 30 seconds…</span></div>
     </form>
+    {% if grades %}<h2 style="margin-top:1.5rem">Attempts</h2>{% endif %}
     {% for s, g in grades|reverse %}
     <div class="card">
       <div class="grade"><div class="eyebrow">Attempt {{ loop.revindex }}</div><span class="small faint">{{ s.submitted_at.strftime('%Y-%m-%d %H:%M') }} UTC</span></div>
-      {% if g %}<div class="stat" style="margin:.3rem 0">{{ g.score }}/{{ g.max_score }} {% if not g.verified %}<span class="pill bad">unverified, provisional</span>{% endif %}</div>
-      <ul class="rubric small" style="padding-left:1rem">{% for b in g.rubric_breakdown %}<li><span class="pts">{{ b.points_awarded }}/{{ b.points_possible }}</span> {{ b.criterion }}<div class="muted">{{ b.justification }}</div></li>{% endfor %}</ul>
+      {% if g %}<div class="stat" style="margin:.3rem 0">{{ g.score|num }}/{{ g.max_score|num }} <span class="pill {{ 'good' if g.max_score and g.score / g.max_score >= 0.7 else 'bad' }}" style="font-size:.75rem">{{ (100 * g.score / g.max_score)|round|int if g.max_score else 0 }}%</span>{% if not g.verified %} <span class="pill bad">unverified, provisional</span>{% endif %}</div>
+      <ul class="rubric small" style="padding-left:1rem">{% for b in g.rubric_breakdown %}<li><span class="pts">{{ b.points_awarded|num }}/{{ b.points_possible|num }}</span> {{ b.criterion }}<div class="muted">{{ b.justification }}</div></li>{% endfor %}</ul>
       <div class="prose" style="font-size:1rem">{{ g.feedback|md|safe }}</div>{% if g.verifier_notes %}<p class="small faint">Verifier: {{ g.verifier_notes }}</p>{% endif %}
       {% else %}<p class="muted">not graded</p>{% endif %}
     </div>

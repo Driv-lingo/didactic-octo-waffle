@@ -6,11 +6,11 @@
   <div class="card"><div class="eyebrow">Retrieval</div><div class="stat">{{ status.due }}<small>due of {{ status.cards }}</small></div><div class="small muted">retention {{ status.retention }} · <a href="/review">review</a></div></div>
   <div class="card"><div class="eyebrow">Work</div><div class="stat">{{ status.submissions }}<small>submissions</small></div><div class="small muted">{{ status.edge_notes }} edge notes recorded</div></div>
   <div class="card"><div class="eyebrow">Anchors</div><div class="stat" style="font-size:1.1rem">{% if status.anchors %}{{ status.anchors|join(", ") }}{% else %}<span class="faint">chosen after gate 2</span>{% endif %}</div>
-    <form method="post" action="/anchors" class="actions" style="margin:.5rem 0 0"><input type="text" name="a1" placeholder="field" size="8"> <input type="text" name="a2" placeholder="field" size="8"> <button class="btn ghost sm">Set</button></form></div>
+    <form method="post" action="/anchors" style="display:flex; gap:.4rem; margin:.6rem 0 0"><input type="text" name="a1" placeholder="field" style="width:5.5rem"><input type="text" name="a2" placeholder="field" style="width:5.5rem"><button class="btn ghost sm">Set</button></form></div>
 </div>
 <h2>Modules in this phase</h2>
 <div class="card flat"><table><thead><tr><th>Module</th><th></th><th>Weeks</th><th></th></tr></thead><tbody>
-{% for m in phase.modules %}<tr><td><a href="/module/{{ m.id }}">{{ m.id }}</a></td><td>{{ m.title }}</td><td class="muted">{{ m.weeks }}</td><td><a href="/tutor/{{ m.id }}">tutor</a></td></tr>{% endfor %}
+{% for m in phase.modules %}<tr><td><a href="/module/{{ m.id }}">{{ m.id }}</a></td><td>{{ m.title }}</td><td class="muted">{{ m.weeks|num }}</td><td><a href="/tutor/{{ m.id }}">tutor</a></td></tr>{% endfor %}
 </tbody></table></div>
 {% if gate %}
 <h2>{{ gate.title }}</h2>

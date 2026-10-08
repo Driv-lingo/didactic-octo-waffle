@@ -34,7 +34,7 @@ def test_web_flow_offline(tmp_path):
     assert "unlocks after your first submission" in r.text
     c.post("/problem/p1.ode.001/submit", data={"content": "ANSWER: exp(-t)-exp(-2*t)"})
     r = c.get("/problem/p1.ode.001")
-    assert "4.0/8" in r.text and "Reference solution" in r.text
+    assert "4/8" in r.text and "Reference solution" in r.text
     c.post("/tutor/p1.ode", data={"message": "help", "problem": "p1.ode.001"})
     assert "offline faculty" in c.get("/tutor/p1.ode?problem=p1.ode.001").text
     r = c.post("/exam/gate1.written/start", follow_redirects=False)

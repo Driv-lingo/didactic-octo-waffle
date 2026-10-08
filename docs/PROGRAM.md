@@ -3,9 +3,9 @@
 ## Goal and honest framing
 
 Take a learner from a beginner start to the standard of a PhD qualifying exam in two anchor
-fields and first-year graduate level in six others, across physics, chemistry, computer
-science, electrical engineering, mechanical engineering, biomedical engineering, biology, and
-mathematics, with no human faculty, in about 18 months at 26 hours a week.
+fields and first-year graduate level in seven others, across physics, chemistry, computer
+science, electrical engineering, mechanical engineering, biomedical engineering, biology,
+mathematics, and operations research, with no human faculty, in about 20 months at 26 hours a week.
 
 Two things are said to every entrant on day one. First, this is a mastery program, not a
 schedule: you stay in a phase until you pass its gate, however long that takes. Second, the
@@ -18,9 +18,9 @@ fields. Nobody is.
 
 ## Design principles
 
-- **Teach the shared core once.** Six modes of reasoning cover all eight fields: continuous
+- **Teach the shared core once.** Seven modes of reasoning cover all nine fields: continuous
   dynamics, energy and thermodynamics, statistical inference, computation, feedback and
-  control, information and evolution. ECE, ME, and BME share most of their mathematics, and
+  control, information and evolution, and optimization and decision. ECE, ME, and BME share most of their mathematics, and
   CS and math are tools used by the rest.
 - **Graduate texts from day one.** Every subject starts from the graduate standard and
   backfills prerequisites just in time. Brutal in the first phase, and the only way to reach
@@ -44,15 +44,16 @@ fields. Nobody is.
    complex analysis, and computation in Python and C with numerical methods treated as part of
    the mathematics. Gate 1: a written exam at the level of a first-year graduate mathematics
    final, and a 30-minute oral.
-2. **The physical sciences at graduate level, about 24 weeks.** Classical mechanics,
+2. **The physical sciences at graduate level, about 27 weeks.** Classical mechanics,
    electrodynamics, quantum mechanics, statistical mechanics, physical and quantum chemistry,
-   algorithms and complexity, computer systems. Gate 2: a full written qualifying exam in
+   algorithms and complexity, computer systems, and linear and convex optimization. Gate 2: a full written qualifying exam in
    physics at the pass standard of a strong department, and an oral. Anchor fields are chosen
    on passing.
-3. **Engineered and living systems, about 18 weeks.** Signals, systems, and control taught once
+3. **Engineered and living systems, about 21 weeks.** Signals, systems, and control taught once
    across ECE, ME, and BME; electromagnetics and devices; continuum mechanics and fluids; heat
    and mass transfer; molecular and cell biology as physics; physiology, biomechanics, and
-   bioinstrumentation. A weekly reproduction of a published result with a documented
+   bioinstrumentation; stochastic models and decisions (queues, Markov decision processes,
+   simulation). A weekly reproduction of a published result with a documented
    limitation the authors did not state. Gate 3: a graduate final in every non-anchor field in
    one week, and an oral.
 4. **Research and defense, about 18 weeks.** A reproduction-with-extension project in an anchor

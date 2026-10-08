@@ -320,7 +320,7 @@ class Orchestrator:
                 awarded = max(0, min(rs.points_awarded, cap))
                 score += awarded
                 breakdown.append({"criterion": rs.criterion, "points_possible": cap, "points_awarded": awarded, "justification": rs.justification})
-            feedback_parts.append(verdict.feedback)
+            feedback_parts = [verdict.feedback]  # the deterministic line already appears in the breakdown
             self._record_edges(learner, p.module, verdict.edge_notes, "grader")
         grade = Grade(
             submission_id=sub_id,

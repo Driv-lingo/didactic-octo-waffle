@@ -17,8 +17,8 @@
 </script>
 {% else %}
 <h1>{{ spec.title }}</h1>
-<div class="card"><div class="stat"><span class="{{ 'pill good' if att.passed else 'pill bad' }}" style="font-size:1rem">{{ 'PASS' if att.passed else 'FAIL' }}</span> {{ att.score }}<small>/ {{ att.max_score }}</small></div></div>
-{% for s, g in results %}<div class="card"><div class="eyebrow"><a href="/problem/{{ s.problem_id }}">{{ s.problem_id }}</a></div>{% if g %}<div class="stat" style="font-size:1.2rem">{{ g.score }}<small>/ {{ g.max_score }}</small>{% if not g.verified %} <span class="pill bad">unverified</span>{% endif %}</div><div class="prose" style="font-size:1rem">{{ g.feedback|md|safe }}</div>{% else %}<span class="muted">blank</span>{% endif %}</div>{% endfor %}
+<div class="card"><div class="stat"><span class="{{ 'pill good' if att.passed else 'pill bad' }}" style="font-size:1rem">{{ 'PASS' if att.passed else 'FAIL' }}</span> {{ att.score|num }}<small>/ {{ att.max_score|num }}</small></div></div>
+{% for s, g in results %}<div class="card"><div class="eyebrow"><a href="/problem/{{ s.problem_id }}">{{ s.problem_id }}</a></div>{% if g %}<div class="stat" style="font-size:1.2rem">{{ g.score|num }}<small>/ {{ g.max_score|num }}</small>{% if not g.verified %} <span class="pill bad">unverified</span>{% endif %}</div><div class="prose" style="font-size:1rem">{{ g.feedback|md|safe }}</div>{% else %}<span class="muted">blank</span>{% endif %}</div>{% endfor %}
 <p><a class="btn secondary" href="/progress">Back to progress</a></p>
 {% endif %}
 {% endblock %}
