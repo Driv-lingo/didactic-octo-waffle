@@ -67,9 +67,9 @@ az containerapp env storage set -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" 
   --azure-file-account-name "$STORAGE" --azure-file-account-key "$KEY" --azure-file-share-name "$SHARE" \
   --access-mode ReadWrite --only-show-errors >/dev/null
 
-echo "== build and deploy the app from source (quiet for 5-15 minutes while Azure builds the image)"
+echo "== build and deploy the app from source (5-15 minutes; build output follows)"
 az containerapp up -g "$RG" -n "$APP" --environment "$ENV_NAME" --source . --ingress external --target-port 8000 \
-  --env-vars "MINIMUM_DB=/data/learner.db" "MINIMUM_MODEL=$MODEL" "MINIMUM_LEARNER=$LEARNER" --only-show-errors >/dev/null
+  --env-vars "MINIMUM_DB=/data/learner.db" "MINIMUM_MODEL=$MODEL" "MINIMUM_LEARNER=$LEARNER"
 
 echo "== secrets and volume"
 az containerapp secret set -g "$RG" -n "$APP" --secrets "anthropic-api-key=$ANTHROPIC_API_KEY" "minimum-token=$MINIMUM_TOKEN" --only-show-errors >/dev/null
