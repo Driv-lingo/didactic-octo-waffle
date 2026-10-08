@@ -1,0 +1,667 @@
+id: science
+title: The Minimum
+tagline: From zero to the qualifying-exam gate in eight fields, taught entirely by an adversarial AI faculty.
+total_hours: 2000
+expected_months: 18
+weekly_hours: 26
+
+modes:
+  dynamics: Continuous dynamics. Differential equations, mechanics, fields, waves. How systems evolve.
+  energy: Energy and thermodynamics. Conservation, entropy, equilibrium, transport. What is possible and what it costs.
+  inference: Statistical inference. Probability, estimation, uncertainty, experimental design. How to know things from data.
+  computation: Discrete and computational thinking. Algorithms, complexity, systems, numerical methods. What can be computed and how fast.
+  feedback: Feedback and control. Signals, stability, loops, regulation. How systems hold a state or lose it.
+  information: Information and evolution. Molecular biology as information processing, selection, replication, error. How living systems came to be and stay alive.
+
+rules:
+  - The standard is the PhD qualifying exam. Undergraduate-level performance is a fail at every gate.
+  - Gates are mastery gates. There is no clock and no elimination; you stay in a phase until you pass its gate.
+  - Each gate attempt draws a fresh problem set. Attempts are separated by a cooldown so you study rather than re-roll.
+  - Solutions unlock only after you submit an attempt. The tutor will not solve an assigned problem for you.
+  - The examiner never sees the tutor's notes on your weaknesses. It has to find them itself, and it will.
+  - Every grade and every tutor reply is checked by a verifier before you see it. A grade marked unverified is provisional.
+  - Everything is cumulative. Any exam may draw on anything taught since day one. Forgetting is failure.
+  - Retrieval comes first every day. Overdue cards are the first block, always.
+  - Each week you write and submit one lecture on earlier material. Teaching is the test that exposes shallow understanding.
+  - Each week you sit one 30-minute oral exam. The examiner probes until it finds the edge of what you know and records it.
+  - AI tools are permitted for literature search, derivation checking, and code. Every AI output used in submitted work must be independently verified and the verification shown. Unverified use is a failed submission.
+  - Seven to eight hours of sleep is part of the program. Consolidation happens during sleep; a sleep-deprived hour retains less.
+  - Measure first, model second. Every physical-science module includes a cheap experiment from the lab kit.
+  - You pick two anchor fields at the end of Phase 2. You will be examined to qualifying-exam standard in those and to first-year graduate standard in the rest.
+
+daily_blocks:
+  - name: retrieval
+    hours: 0.5
+    description: Spaced retrieval over everything learned so far. Overdue cards first. Non-negotiable.
+  - name: new material
+    hours: 1.0
+    description: Read the graduate text for the current module. Backfill prerequisites just in time, never ahead of need.
+  - name: problem sets
+    hours: 1.5
+    description: Work problems from the bank. Submit everything, including failures. Solutions unlock on submission.
+  - name: project and code
+    hours: 0.5
+    description: The current module's model, experiment, or reproduction. Code is part of the mathematics.
+  - name: reading above level
+    hours: 0.5
+    description: Read a paper or chapter that is slightly too hard. Summarize its claim, method, and weakest point in three lines.
+
+phases:
+  - id: p1
+    title: The mathematical and computational minimum
+    weeks: 18
+    goal: Every tool the other seven fields use, at the level of a first-year graduate mathematics final, plus fluent computation.
+    modules:
+      - id: p1.analysis
+        title: Real analysis
+        mode: dynamics
+        field: math
+        weeks: 3
+        summary: Limits, continuity, differentiation, Riemann integration, sequences and series of functions, with proofs. The language every later derivation is written in.
+        outcomes:
+          - Prove statements about limits and continuity directly from epsilon-delta definitions.
+          - State and use the mean value theorem, the fundamental theorem of calculus, and uniform convergence theorems.
+          - Decide whether an interchange of limit and integral is justified and say why.
+        texts:
+          - { title: Principles of Mathematical Analysis, author: Rudin, note: the standard; chapters 1-7 }
+          - { title: Basic Analysis I, author: Lebl, open_access: true, url: "https://www.jirka.org/ra/", note: open text with the same content at a gentler pace }
+          - { title: Understanding Analysis, author: Abbott, note: use when Rudin is too terse }
+        concepts:
+          - epsilon-delta definition of a limit
+          - completeness of the reals and the supremum property
+          - uniform versus pointwise convergence
+          - mean value theorem and its proof
+          - Riemann integrability criterion
+          - interchange of limit and integral
+        project: Implement adaptive numerical integration and prove an error bound for it on a class of functions.
+      - id: p1.linalg
+        title: Linear algebra
+        mode: computation
+        field: math
+        weeks: 3
+        summary: Vector spaces, linear maps, eigenvalues, inner products, spectral theorem, singular value decomposition, done abstractly and numerically at the same time.
+        outcomes:
+          - Prove the spectral theorem for self-adjoint operators and use it.
+          - Compute and interpret eigendecompositions and the SVD by hand on small cases and numerically on large ones.
+          - Explain conditioning and why naive algorithms fail in floating point.
+        texts:
+          - { title: Linear Algebra Done Right, author: Axler, open_access: true, url: "https://linear.axler.net/", note: 4th edition is open access }
+          - { title: Numerical Linear Algebra, author: Trefethen and Bau, note: the numerical half }
+          - { title: Introduction to Linear Algebra, author: Strang, note: bridge if abstraction is new }
+        concepts:
+          - linear independence, basis, dimension
+          - eigenvalues and diagonalizability
+          - inner product spaces and orthogonal projection
+          - spectral theorem for self-adjoint operators
+          - singular value decomposition
+          - condition number and floating-point error
+        prerequisites: []
+        project: Write your own QR-based eigenvalue solver and compare it against a library on ill-conditioned matrices.
+      - id: p1.ode
+        title: Ordinary differential equations and dynamical systems
+        mode: dynamics
+        field: math
+        weeks: 2
+        summary: Existence and uniqueness, linear systems, phase portraits, stability, bifurcations, numerical integration.
+        outcomes:
+          - Solve linear systems with constant coefficients and classify fixed points.
+          - State the existence-uniqueness theorem and know when it fails.
+          - Analyze stability by linearization and by Lyapunov functions.
+        texts:
+          - { title: Nonlinear Dynamics and Chaos, author: Strogatz, note: chapters 1-8 }
+          - { title: Notes on Diffy Qs, author: Lebl, open_access: true, url: "https://www.jirka.org/diffyqs/" }
+        concepts:
+          - existence and uniqueness (Picard-Lindelöf)
+          - matrix exponential and linear systems
+          - classification of fixed points in the plane
+          - linearization and the Hartman-Grobman theorem
+          - Lyapunov functions
+          - saddle-node, pitchfork, and Hopf bifurcations
+        prerequisites: [p1.analysis, p1.linalg]
+        project: Build an RK4 integrator, verify its order numerically, and map the bifurcation diagram of a driven pendulum.
+      - id: p1.pde
+        title: Partial differential equations and Fourier analysis
+        mode: dynamics
+        field: math
+        weeks: 2
+        summary: The heat, wave, and Laplace equations; separation of variables; Fourier series and transforms; Green's functions.
+        outcomes:
+          - Solve the three canonical PDEs on standard domains by separation of variables.
+          - Use Fourier transforms to solve linear PDEs on the line and interpret the result physically.
+          - Construct a Green's function for a simple boundary value problem.
+        texts:
+          - { title: "Partial Differential Equations: An Introduction", author: Strauss }
+          - { title: Applied Partial Differential Equations, author: Haberman, note: more worked examples }
+        concepts:
+          - classification of second-order linear PDEs
+          - separation of variables and Sturm-Liouville eigenproblems
+          - Fourier series convergence
+          - Fourier transform and the heat kernel
+          - Green's functions
+          - d'Alembert's solution of the wave equation
+        prerequisites: [p1.analysis, p1.ode]
+        project: Solve the heat equation numerically and spectrally on the same problem and show where each method fails.
+      - id: p1.prob
+        title: Probability and statistical inference
+        mode: inference
+        field: math
+        weeks: 3
+        summary: Measure-light probability, random variables, limit theorems, estimation, hypothesis testing, Bayesian inference, and the design of experiments.
+        outcomes:
+          - Derive the law of large numbers and the central limit theorem and state their hypotheses.
+          - Construct maximum likelihood and Bayesian estimators and compare them.
+          - Design an experiment with a power calculation and spot a confounded one.
+        texts:
+          - { title: Probability and Random Processes, author: Grimmett and Stirzaker }
+          - { title: Introduction to Probability, author: Blitzstein and Hwang, open_access: true, url: "https://projects.iq.harvard.edu/stat110/home" }
+          - { title: Statistical Inference, author: Casella and Berger, note: estimation and testing }
+        concepts:
+          - conditional probability and Bayes' rule
+          - expectation, variance, and generating functions
+          - law of large numbers and central limit theorem
+          - maximum likelihood estimation
+          - Bayesian posterior and conjugate priors
+          - hypothesis tests, p-values, and power
+          - confounding and randomization
+        prerequisites: [p1.analysis]
+        project: Run a Monte Carlo simulation of a real system and report the result with correctly computed uncertainty.
+      - id: p1.complex
+        title: Complex analysis
+        mode: dynamics
+        field: math
+        weeks: 2
+        summary: Analytic functions, Cauchy's theorem, residues, conformal maps, and the asymptotic methods physics leans on.
+        outcomes:
+          - Evaluate real integrals by residues and justify the contour.
+          - State and use Cauchy's integral formula and Liouville's theorem.
+          - Apply the method of steepest descent to a simple integral.
+        texts:
+          - { title: Visual Complex Analysis, author: Needham }
+          - { title: Complex Analysis, author: Stein and Shakarchi }
+        concepts:
+          - Cauchy-Riemann equations
+          - Cauchy's integral theorem and formula
+          - Laurent series and residues
+          - residue evaluation of real integrals
+          - conformal mapping
+          - method of steepest descent
+        prerequisites: [p1.analysis]
+      - id: p1.compute
+        title: Computation
+        mode: computation
+        field: cs
+        weeks: 3
+        summary: Python and C from the first week, numerical methods as part of the mathematics, and the discipline of testing and verifying your own code.
+        outcomes:
+          - Write correct, tested Python and C for numerical work.
+          - Implement root finding, interpolation, quadrature, and ODE integration and know their error behavior.
+          - Profile code and explain where time goes.
+        texts:
+          - { title: Structure and Interpretation of Computer Programs, author: Abelson and Sussman, open_access: true, url: "https://mitpress.mit.edu/sites/default/files/sicp/index.html" }
+          - { title: The C Programming Language, author: Kernighan and Ritchie }
+          - { title: Scientific Computing, author: Heath, note: numerical methods }
+        concepts:
+          - floating-point representation and rounding error
+          - recursion and iteration
+          - Newton's method and its convergence
+          - polynomial interpolation and Runge's phenomenon
+          - Gaussian quadrature
+          - big-O analysis of simple algorithms
+          - unit testing and property testing
+        project: A tested numerical library (roots, interpolation, quadrature, ODEs) used by every later module.
+
+  - id: p2
+    title: The physical sciences at graduate level
+    weeks: 24
+    goal: Classical mechanics, electrodynamics, quantum mechanics, statistical mechanics, and physical chemistry from the standard graduate texts, with algorithms and systems in parallel. Anchor fields are chosen at the end of this phase.
+    modules:
+      - id: p2.cm
+        title: Classical mechanics
+        mode: dynamics
+        field: physics
+        weeks: 3
+        summary: Lagrangian and Hamiltonian mechanics, symmetries and conservation laws, rigid bodies, small oscillations, canonical transformations, Hamilton-Jacobi theory.
+        outcomes:
+          - Derive equations of motion from a Lagrangian with constraints and identify conserved quantities from symmetries.
+          - Solve small-oscillation problems by normal modes.
+          - Use canonical transformations and Poisson brackets fluently.
+        texts:
+          - { title: Classical Mechanics, author: Goldstein, Poole and Safko }
+          - { title: Mechanics (Course of Theoretical Physics Vol. 1), author: Landau and Lifshitz }
+          - { title: Classical Mechanics, author: Taylor, note: bridge }
+        concepts:
+          - principle of least action and Euler-Lagrange equations
+          - Noether's theorem
+          - Legendre transform and Hamilton's equations
+          - normal modes
+          - Poisson brackets and canonical transformations
+          - Hamilton-Jacobi equation
+        prerequisites: [p1.ode, p1.linalg]
+        project: Measure the period of a physical pendulum versus amplitude with the lab kit and fit it to the full elliptic-integral result.
+      - id: p2.em
+        title: Electrodynamics
+        mode: dynamics
+        field: physics
+        weeks: 4
+        summary: Electrostatics and magnetostatics with boundary value problems, Maxwell's equations, waves, radiation, and special relativity in covariant form.
+        outcomes:
+          - Solve boundary value problems by images, separation of variables, and Green's functions.
+          - Derive wave propagation, reflection, and radiation from Maxwell's equations.
+          - Write electrodynamics covariantly and transform fields between frames.
+        texts:
+          - { title: Classical Electrodynamics, author: Jackson, note: the qualifying-exam standard }
+          - { title: Modern Electrodynamics, author: Zangwill, note: clearer than Jackson in places }
+          - { title: Introduction to Electrodynamics, author: Griffiths, note: bridge }
+        concepts:
+          - Gauss's law and the method of images
+          - multipole expansion
+          - Maxwell's equations and gauge freedom
+          - electromagnetic waves in media and at boundaries
+          - Liénard-Wiechert potentials and radiation
+          - covariant formulation and field tensor
+        prerequisites: [p1.pde, p1.complex]
+      - id: p2.qm
+        title: Quantum mechanics
+        mode: dynamics
+        field: physics
+        weeks: 5
+        summary: Hilbert space formulation, measurement, the harmonic oscillator, angular momentum, hydrogen, perturbation theory, identical particles, scattering.
+        outcomes:
+          - Set up and solve bound-state problems in the Dirac formalism.
+          - Compute perturbative corrections and know when perturbation theory fails.
+          - Add angular momenta and use Clebsch-Gordan coefficients.
+        texts:
+          - { title: Modern Quantum Mechanics, author: Sakurai and Napolitano }
+          - { title: Principles of Quantum Mechanics, author: Shankar, note: more complete derivations }
+          - { title: Introduction to Quantum Mechanics, author: Griffiths and Schroeter, note: bridge }
+        concepts:
+          - postulates and the measurement problem
+          - ladder operators for the harmonic oscillator
+          - angular momentum algebra and spin
+          - hydrogen atom spectrum
+          - time-independent and time-dependent perturbation theory
+          - identical particles and exchange symmetry
+          - Born approximation for scattering
+        prerequisites: [p1.linalg, p1.pde, p2.cm]
+      - id: p2.sm
+        title: Statistical mechanics and thermodynamics
+        mode: energy
+        field: physics
+        weeks: 4
+        summary: Thermodynamic laws and potentials, ensembles, partition functions, quantum gases, phase transitions, fluctuations, and the connection to information.
+        outcomes:
+          - Derive thermodynamics from the canonical and grand canonical ensembles.
+          - Compute properties of ideal classical and quantum gases.
+          - Explain phase transitions with mean-field theory and know its limits.
+        texts:
+          - { title: Statistical Mechanics, author: Pathria and Beale }
+          - { title: Statistical Physics of Particles, author: Kardar }
+          - { title: Thermodynamics and an Introduction to Thermostatistics, author: Callen, note: the thermodynamic half }
+        concepts:
+          - laws of thermodynamics and thermodynamic potentials
+          - microcanonical, canonical, and grand canonical ensembles
+          - partition function and its derivatives
+          - Bose-Einstein and Fermi-Dirac statistics
+          - mean-field theory and the Ising model
+          - fluctuation-dissipation
+        prerequisites: [p1.prob, p2.cm]
+        project: Measure a cooling curve with the lab kit and extract the heat transfer coefficient with a proper uncertainty.
+      - id: p2.pchem
+        title: Physical and quantum chemistry
+        mode: energy
+        field: chemistry
+        weeks: 3
+        summary: Chemical bonding from quantum mechanics, molecular orbital theory, spectroscopy, chemical thermodynamics and equilibrium, kinetics and reaction rate theory.
+        outcomes:
+          - Build molecular orbital diagrams from symmetry and explain bonding and reactivity from them.
+          - Derive equilibrium constants from partition functions.
+          - Use transition state theory to predict rate temperature dependence.
+        texts:
+          - { title: Quantum Chemistry, author: McQuarrie }
+          - { title: "Physical Chemistry: A Molecular Approach", author: McQuarrie and Simon }
+          - { title: Physical Chemistry, author: Atkins and de Paula, note: breadth }
+        concepts:
+          - Born-Oppenheimer approximation
+          - LCAO and molecular orbital theory
+          - Hückel theory
+          - chemical potential and equilibrium constants
+          - Arrhenius and Eyring rate equations
+          - rotational and vibrational spectroscopy
+        prerequisites: [p2.qm, p2.sm]
+      - id: p2.algo
+        title: Algorithms and complexity
+        mode: computation
+        field: cs
+        weeks: 3
+        summary: Algorithm design and analysis, data structures, graph algorithms, dynamic programming, computability and NP-completeness, randomized algorithms.
+        outcomes:
+          - Design and analyze algorithms with correctness proofs and tight bounds.
+          - Prove a problem NP-complete by reduction.
+          - Use randomization and amortization correctly.
+        texts:
+          - { title: Introduction to Algorithms, author: Cormen, Leiserson, Rivest and Stein }
+          - { title: Introduction to the Theory of Computation, author: Sipser }
+          - { title: Algorithm Design, author: Kleinberg and Tardos }
+        concepts:
+          - asymptotic analysis and recurrences
+          - divide and conquer
+          - dynamic programming
+          - graph search, shortest paths, and flows
+          - reductions and NP-completeness
+          - randomized algorithms and expected running time
+        prerequisites: [p1.compute, p1.prob]
+      - id: p2.sys
+        title: Computer systems
+        mode: computation
+        field: cs
+        weeks: 2
+        summary: How programs actually run; machine representation, memory hierarchy, processes, concurrency, and the operating system.
+        outcomes:
+          - Explain what the machine does with a line of C, including the cache and the pipeline.
+          - Write correct concurrent code and explain a race.
+          - Read a profile and know what to change.
+        texts:
+          - { title: "Computer Systems: A Programmer's Perspective", author: Bryant and O'Hallaron }
+          - { title: "Operating Systems: Three Easy Pieces", author: Arpaci-Dusseau, open_access: true, url: "https://pages.cs.wisc.edu/~remzi/OSTEP/" }
+        concepts:
+          - two's complement and IEEE 754
+          - memory hierarchy and cache behavior
+          - virtual memory
+          - processes, threads, and scheduling
+          - locks, races, and deadlock
+        prerequisites: [p1.compute]
+
+  - id: p3
+    title: Engineered and living systems
+    weeks: 18
+    goal: ECE, ME, and BME at first-year graduate level, built on the physics; biology taught as the statistical physics of information systems; a weekly reproduction of a published result.
+    modules:
+      - id: p3.signals
+        title: Signals, systems, and control
+        mode: feedback
+        field: ece
+        weeks: 3
+        summary: LTI systems, transforms, sampling, filters, state space, stability, feedback design, and the limits of control. Taught once, with ECE, ME, and BME examples side by side, because it is the same mathematics.
+        outcomes:
+          - Analyze LTI systems in time and frequency and design a filter to a spec.
+          - Assess closed-loop stability by Nyquist, Bode, and root locus.
+          - Design a state-feedback controller and an observer and say why one would fail.
+        texts:
+          - { title: Signals and Systems, author: Oppenheim and Willsky }
+          - { title: Feedback Systems, author: Åström and Murray, open_access: true, url: "https://fbswiki.org/" }
+          - { title: Modern Control Engineering, author: Ogata }
+        concepts:
+          - convolution and LTI systems
+          - Laplace, Fourier, and z transforms
+          - sampling theorem and aliasing
+          - Bode and Nyquist stability criteria
+          - state-space models and controllability
+          - PID design and its limits
+        prerequisites: [p1.pde, p1.complex]
+        project: Build a temperature controller with the lab kit, identify the plant, design the loop, and show the measured step response against the model.
+      - id: p3.emdev
+        title: Electromagnetics, circuits, and devices
+        mode: dynamics
+        field: ece
+        weeks: 3
+        summary: Circuit analysis as applied Maxwell, transmission lines, semiconductor physics, diodes and transistors, amplifiers, and the digital abstraction.
+        outcomes:
+          - Analyze and build analog circuits and explain their behavior from device physics.
+          - Model a transmission line and a simple antenna.
+          - Explain a transistor from band structure to the small-signal model.
+        texts:
+          - { title: The Art of Electronics, author: Horowitz and Hill }
+          - { title: Microelectronic Circuits, author: Sedra and Smith }
+          - { title: Physics of Semiconductor Devices, author: Sze and Ng }
+        concepts:
+          - Kirchhoff's laws as limits of Maxwell's equations
+          - impedance and frequency response
+          - transmission line equations
+          - p-n junction and the diode equation
+          - MOSFET operation and small-signal models
+          - op-amp circuits and feedback
+        prerequisites: [p2.em, p3.signals]
+      - id: p3.continuum
+        title: Continuum mechanics and fluids
+        mode: dynamics
+        field: me
+        weeks: 3
+        summary: Stress and strain, elasticity, Navier-Stokes, dimensional analysis, boundary layers, turbulence as an open problem, and computational fluid dynamics.
+        outcomes:
+          - Derive the equations of elasticity and fluid motion from conservation laws.
+          - Use dimensional analysis to predict scaling before computing anything.
+          - Solve canonical viscous flows and explain the boundary layer.
+        texts:
+          - { title: Fluid Mechanics (Course of Theoretical Physics Vol. 6), author: Landau and Lifshitz }
+          - { title: Fluid Mechanics, author: Kundu, Cohen and Dowling }
+          - { title: An Introduction to Continuum Mechanics, author: Gurtin }
+        concepts:
+          - stress tensor and Cauchy's equation
+          - linear elasticity and Hooke's law in tensor form
+          - Navier-Stokes equations
+          - Reynolds number and dimensional analysis
+          - Poiseuille and Couette flow
+          - boundary layer scaling
+        prerequisites: [p2.cm, p1.pde]
+        project: Measure flow through a tube with the lab kit and test Poiseuille's law across a range of Reynolds numbers.
+      - id: p3.heat
+        title: Heat and mass transfer
+        mode: energy
+        field: me
+        weeks: 2
+        summary: Conduction, convection, radiation, and diffusion, with the engineering correlations and the physics behind them.
+        outcomes:
+          - Solve transient conduction problems analytically and numerically.
+          - Use convection correlations and know their range of validity.
+          - Set up a coupled heat and mass transfer problem.
+        texts:
+          - { title: Fundamentals of Heat and Mass Transfer, author: Incropera, DeWitt, Bergman and Lavine }
+          - { title: Transport Phenomena, author: Bird, Stewart and Lightfoot }
+        concepts:
+          - Fourier's law and the heat equation
+          - lumped capacitance and the Biot number
+          - Nusselt number correlations
+          - radiation exchange between surfaces
+          - Fick's law and diffusion
+        prerequisites: [p1.pde, p2.sm]
+      - id: p3.cellbio
+        title: Molecular and cell biology as physics
+        mode: information
+        field: biology
+        weeks: 3
+        summary: The central dogma, gene regulation, molecular machines, membranes, and metabolism, taught as information processing and energy transduction with numbers attached. Evolution as the organizing principle.
+        outcomes:
+          - Estimate the rates, energies, and copy numbers of cellular processes from first principles.
+          - Model a gene regulatory circuit and predict its behavior.
+          - Explain selection quantitatively and apply it to a real case.
+        texts:
+          - { title: Molecular Biology of the Cell, author: Alberts et al. }
+          - { title: Physical Biology of the Cell, author: Phillips, Kondev, Theriot and Garcia }
+          - { title: Biological Physics, author: Nelson }
+        concepts:
+          - central dogma and its error rates
+          - transcriptional regulation and the lac operon
+          - diffusion-limited reaction rates
+          - ATP hydrolysis and free energy budgets
+          - membrane potential and the Nernst equation
+          - population genetics and selection coefficients
+        prerequisites: [p2.sm, p1.prob]
+        project: Measure a yeast growth curve with the lab kit and fit a model with a correctly propagated doubling time.
+      - id: p3.physio
+        title: Physiology, biomechanics, and bioinstrumentation
+        mode: feedback
+        field: bme
+        weeks: 3
+        summary: Physiological systems as control systems, the mechanics of tissues, and the instruments that measure living things, including the noise that limits them.
+        outcomes:
+          - Model a physiological control loop and explain a disease as its failure.
+          - Analyze soft tissue mechanics with the right constitutive model.
+          - Design a biopotential measurement chain and compute its noise floor.
+        texts:
+          - { title: Textbook of Medical Physiology, author: Guyton and Hall }
+          - { title: "Biomechanics: Mechanical Properties of Living Tissues", author: Fung }
+          - { title: Medical Instrumentation, author: Webster }
+        concepts:
+          - homeostasis as feedback control
+          - cardiovascular system as a circuit
+          - Hodgkin-Huxley model
+          - viscoelasticity of tissues
+          - biopotential amplifiers and noise
+          - medical imaging physics
+        prerequisites: [p3.signals, p3.cellbio, p3.continuum]
+        project: Build a sensor, microcontroller, and software device that measures a biological or mechanical quantity, and characterize its noise.
+      - id: p3.repro
+        title: Reproduction practicum
+        mode: inference
+        field: physics
+        weeks: 1
+        summary: Each week of this phase, reproduce one published result in any field and document a flaw or limitation the authors did not state. This module runs alongside the others.
+        outcomes:
+          - Reproduce a published computation or analysis from the paper alone.
+          - Locate and document the weakest claim in a paper.
+          - Write a reproduction report another researcher could act on.
+        texts:
+          - { title: Selected papers, author: chosen weekly with the advisor, note: at least one per field over the phase }
+        concepts:
+          - reproduction versus replication
+          - identifying unstated assumptions
+          - reading a methods section for what is missing
+        prerequisites: [p1.prob]
+
+  - id: p4
+    title: Research and defense
+    weeks: 18
+    goal: An original reproduction-with-extension result in an anchor field, written qualifying exams in both anchors, and an oral defense before the examiner at qualifying-exam standard.
+    modules:
+      - id: p4.research
+        title: Research project
+        mode: inference
+        field: physics
+        weeks: 12
+        summary: A reproduction of a published result plus one real extension, scoped with the advisor to fit the time, written up to a standard that could survive peer review.
+        outcomes:
+          - Scope a research question to the available time.
+          - Produce a result with a verified computation or measurement behind every claim.
+          - Write a paper that survives a hostile reviewer.
+        texts:
+          - { title: The literature of the anchor field, author: various, note: the advisor helps select }
+        concepts:
+          - scoping a research question
+          - verification of AI-assisted derivations
+          - responding to review
+      - id: p4.quals
+        title: Qualifying exams
+        mode: dynamics
+        field: physics
+        weeks: 4
+        summary: Written qualifying exams in both anchor fields, drawn from the bank at the standard of a strong department.
+        outcomes:
+          - Pass a written qualifying exam in each anchor field.
+        concepts:
+          - everything since day one
+      - id: p4.defense
+        title: Oral defense
+        mode: dynamics
+        field: physics
+        weeks: 2
+        summary: A three-hour oral defense of the research project and of the anchor fields, run by the examiner with no access to the tutor's notes.
+        outcomes:
+          - Defend the project and the anchor fields orally at qualifying-exam standard.
+        concepts:
+          - everything since day one
+
+gates:
+  - id: gate1
+    title: Gate 1
+    after_phase: p1
+    exams: [gate1.written, gate1.oral]
+    description: A written exam at the level of a first-year graduate mathematics final, and a 30-minute oral.
+  - id: gate2
+    title: Gate 2
+    after_phase: p2
+    exams: [gate2.written, gate2.oral]
+    description: A full written qualifying exam in physics at the pass standard of a strong department, and an oral. Anchor fields are chosen on passing.
+  - id: gate3
+    title: Gate 3
+    after_phase: p3
+    exams: [gate3.written, gate3.oral]
+    description: A graduate final in every non-anchor field in a single week, and an oral.
+  - id: final
+    title: Completion
+    after_phase: p4
+    exams: [final.written, final.defense]
+    description: Written qualifying exams in the anchor fields and the oral defense.
+
+exams:
+  - id: gate1.written
+    title: Gate 1 written
+    modules: [p1.analysis, p1.linalg, p1.ode, p1.pde, p1.prob, p1.complex, p1.compute]
+    n_problems: 8
+    min_difficulty: 3
+    pass_mark: 0.7
+    duration_minutes: 240
+    cooldown_days: 7
+  - id: gate1.oral
+    title: Gate 1 oral
+    modules: [p1.analysis, p1.linalg, p1.ode, p1.pde, p1.prob, p1.complex, p1.compute]
+    n_problems: 0
+    pass_mark: 1.0
+    duration_minutes: 30
+    cooldown_days: 7
+    oral: true
+    standard: first-year graduate mathematics final
+    max_questions: 12
+  - id: gate2.written
+    title: Gate 2 written
+    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.sys]
+    n_problems: 8
+    min_difficulty: 3
+    pass_mark: 0.6
+    duration_minutes: 360
+    cooldown_days: 14
+  - id: gate2.oral
+    title: Gate 2 oral
+    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p2.sys]
+    n_problems: 0
+    pass_mark: 1.0
+    duration_minutes: 45
+    cooldown_days: 14
+    oral: true
+    standard: physics PhD qualifying exam
+    max_questions: 15
+  - id: gate3.written
+    title: Gate 3 written
+    modules: [p3.signals, p3.emdev, p3.continuum, p3.heat, p3.cellbio, p3.physio]
+    n_problems: 6
+    min_difficulty: 3
+    pass_mark: 0.6
+    duration_minutes: 300
+    cooldown_days: 14
+  - id: gate3.oral
+    title: Gate 3 oral
+    modules: [p3.signals, p3.emdev, p3.continuum, p3.heat, p3.cellbio, p3.physio]
+    n_problems: 0
+    pass_mark: 1.0
+    duration_minutes: 45
+    cooldown_days: 14
+    oral: true
+    standard: first-year graduate final in each engineering and biology field
+    max_questions: 15
+  - id: final.written
+    title: Final written qualifying exams
+    modules: [p2.cm, p2.em, p2.qm, p2.sm, p2.pchem, p2.algo, p3.signals, p3.continuum, p3.cellbio]
+    n_problems: 6
+    min_difficulty: 4
+    pass_mark: 0.6
+    duration_minutes: 360
+    cooldown_days: 21
+  - id: final.defense
+    title: Oral defense
+    modules: [p4.research, p4.quals, p4.defense]
+    n_problems: 0
+    pass_mark: 1.0
+    duration_minutes: 180
+    cooldown_days: 21
+    oral: true
+    standard: PhD qualifying exam in the anchor fields, and a defensible research result
+    max_questions: 30

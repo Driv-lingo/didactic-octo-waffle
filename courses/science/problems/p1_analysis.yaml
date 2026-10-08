@@ -1,0 +1,128 @@
+- id: p1.analysis.001
+  module: p1.analysis
+  kind: proof
+  difficulty: 3
+  statement: |
+    Let f be continuous on [a, b] with f(a) < 0 < f(b). Prove, using only the
+    supremum property of the reals and the definition of continuity, that there
+    exists c in (a, b) with f(c) = 0.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Defines S = {x in [a,b] : f(x) < 0}, shows it is nonempty and bounded, and sets c = sup S" }
+      - { points: 3, criterion: "Shows f(c) <= 0 by taking a sequence in S converging to c and using continuity" }
+      - { points: 3, criterion: "Shows f(c) >= 0: if f(c) < 0, continuity gives a neighborhood where f < 0, contradicting c = sup S" }
+      - { points: 2, criterion: "Concludes f(c) = 0 and c is strictly inside (a, b) because f(a) < 0 < f(b)" }
+  reference_solution: |
+    Let S = {x in [a,b] : f(x) < 0}. a is in S so S is nonempty, and S is bounded above by b,
+    so c = sup S exists. Take x_n in S with x_n -> c; continuity gives f(c) = lim f(x_n) <= 0.
+    If f(c) < 0, then by continuity there is delta > 0 with f < 0 on (c - delta, c + delta)
+    intersected with [a,b]; since f(b) > 0 we have c < b, so some point to the right of c lies in S,
+    contradicting c = sup S. Hence f(c) = 0. Since f(a) < 0 and f(b) > 0, c differs from both endpoints.
+  concepts: [completeness of the reals and the supremum property, epsilon-delta definition of a limit]
+
+- id: p1.analysis.002
+  module: p1.analysis
+  kind: short
+  difficulty: 3
+  statement: |
+    Give a sequence of continuous functions on [0, 1] that converges pointwise to a
+    discontinuous limit. Prove the convergence is pointwise and explain, with the
+    definition, why it cannot be uniform.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Gives a valid example such as f_n(x) = x^n with limit 0 on [0,1) and 1 at x = 1" }
+      - { points: 3, criterion: "Proves pointwise convergence at every point including the endpoint" }
+      - { points: 3, criterion: "Argues from the definition of uniform convergence (sup |f_n - f| does not go to 0), e.g. by exhibiting x_n = 2^(-1/n) with f_n(x_n) = 1/2" }
+      - { points: 2, criterion: "Connects to the theorem that a uniform limit of continuous functions is continuous" }
+  reference_solution: |
+    f_n(x) = x^n. For x in [0,1), x^n -> 0; at x = 1, f_n(1) = 1. The limit f is 0 on [0,1) and 1 at 1,
+    which is discontinuous. sup_{[0,1]} |f_n - f| >= |f_n(2^{-1/n}) - 0| = 1/2 for every n, so the
+    convergence is not uniform. Since each f_n is continuous and uniform limits of continuous functions
+    are continuous, non-uniformity is forced by the discontinuity of f.
+  concepts: [uniform versus pointwise convergence]
+
+- id: p1.analysis.003
+  module: p1.analysis
+  kind: symbolic
+  difficulty: 2
+  statement: |
+    Evaluate lim_{x -> 0} (e^x - 1 - x) / x^2. Show the argument, and end with a line
+    "ANSWER: <expression>".
+  answer:
+    type: symbolic
+    expr: "1/2"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 3, criterion: "Justifies the method: Taylor expansion with a remainder bound, or two applications of l'Hopital with the hypotheses checked" }
+    - { points: 3, criterion: "Computation is carried out correctly step by step" }
+  reference_solution: |
+    e^x = 1 + x + x^2/2 + O(x^3), so (e^x - 1 - x)/x^2 = 1/2 + O(x) -> 1/2.
+    ANSWER: 1/2
+  concepts: [epsilon-delta definition of a limit]
+
+- id: p1.analysis.004
+  module: p1.analysis
+  kind: proof
+  difficulty: 4
+  statement: |
+    Prove that if f_n -> f uniformly on a set E and each f_n is continuous on E,
+    then f is continuous on E.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Fixes x0 in E and epsilon > 0; chooses N with |f_n - f| < epsilon/3 on all of E for n >= N" }
+      - { points: 3, criterion: "Uses continuity of f_N at x0 to get delta with |f_N(x) - f_N(x0)| < epsilon/3 for |x - x0| < delta" }
+      - { points: 3, criterion: "Assembles the three-epsilon estimate correctly: |f(x)-f(x0)| <= |f(x)-f_N(x)| + |f_N(x)-f_N(x0)| + |f_N(x0)-f(x0)| < epsilon" }
+      - { points: 2, criterion: "Notes explicitly where uniformity (N independent of x) was used" }
+  reference_solution: |
+    Fix x0 in E and epsilon > 0. Uniform convergence gives N with |f_n(x) - f(x)| < epsilon/3 for all
+    x in E and n >= N. f_N is continuous at x0, so there is delta > 0 with |f_N(x) - f_N(x0)| < epsilon/3
+    whenever |x - x0| < delta. Then for such x,
+    |f(x) - f(x0)| <= |f(x) - f_N(x)| + |f_N(x) - f_N(x0)| + |f_N(x0) - f(x0)| < epsilon.
+    Uniformity was needed so the same N works at both x and x0.
+  concepts: [uniform versus pointwise convergence, epsilon-delta definition of a limit]
+
+- id: p1.analysis.005
+  module: p1.analysis
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Evaluate lim_{n -> infinity} (1/n) * sum_{k=1}^{n} sqrt(k/n). Justify the step that
+    turns the sum into something you can evaluate. End with "ANSWER: <expression>".
+  answer:
+    type: symbolic
+    expr: "2/3"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 3, criterion: "Identifies the sum as a Riemann sum for the integral of sqrt(x) on [0,1] and states why the Riemann sums converge (continuity, hence integrability)" }
+    - { points: 3, criterion: "Evaluates the integral correctly" }
+  reference_solution: |
+    (1/n) sum_{k=1}^n sqrt(k/n) is the right Riemann sum of sqrt(x) on [0,1] with mesh 1/n.
+    sqrt is continuous, hence Riemann integrable, so the sums converge to the integral:
+    int_0^1 sqrt(x) dx = 2/3.
+    ANSWER: 2/3
+  concepts: [Riemann integrability criterion]
+
+- id: p1.analysis.006
+  module: p1.analysis
+  kind: proof
+  difficulty: 4
+  statement: |
+    Prove that f(x) = x^2 is uniformly continuous on every bounded interval but not
+    uniformly continuous on the real line.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "On a bounded interval [-M, M]: |x^2 - y^2| = |x - y||x + y| <= 2M|x - y|, so delta = epsilon/(2M) works (or cites the theorem that continuous on compact implies uniformly continuous, with justification)" }
+      - { points: 4, criterion: "On R: negates the definition correctly, picks epsilon = 1, and for any delta exhibits x = 1/delta, y = 1/delta + delta/2 with |x - y| < delta but |x^2 - y^2| >= 1" }
+      - { points: 3, criterion: "The negation of uniform continuity is stated precisely with quantifiers in the right order" }
+  reference_solution: |
+    On [-M, M]: |x^2 - y^2| = |x - y||x + y| <= 2M |x - y|, so delta = epsilon/(2M) works for every x, y.
+    On R: take epsilon = 1. For any delta > 0, let x = 1/delta and y = x + delta/2. Then |x - y| = delta/2 < delta
+    but |y^2 - x^2| = (y - x)(y + x) = (delta/2)(2/delta + delta/2) = 1 + delta^2/4 >= 1. So no delta works
+    for epsilon = 1, and f is not uniformly continuous on R.
+  concepts: [epsilon-delta definition of a limit]

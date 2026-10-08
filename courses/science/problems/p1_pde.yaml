@@ -1,0 +1,98 @@
+- id: p1.pde.001
+  module: p1.pde
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Solve u_t = u_xx on 0 < x < pi with u(0,t) = u(pi,t) = 0 and u(x,0) = sin(3x).
+    End with "ANSWER: <expression in x and t>".
+  answer:
+    type: symbolic
+    expr: "exp(-9*t)*sin(3*x)"
+    symbols: [x, t]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Separates variables and finds the eigenfunctions sin(nx) with decay rates n^2" }
+    - { points: 2, criterion: "Matches the initial condition to the single mode n = 3" }
+  reference_solution: |
+    Separation gives modes e^{-n^2 t} sin(nx). The initial condition is the n = 3 mode alone.
+    ANSWER: exp(-9*t)*sin(3*x)
+  concepts: [separation of variables and Sturm-Liouville eigenproblems]
+
+- id: p1.pde.002
+  module: p1.pde
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Find the Fourier sine coefficients b_n of f(x) = x on (-pi, pi), where
+    f(x) ~ sum b_n sin(nx). Give b_n as a function of n. End with "ANSWER: <expression in n>".
+  answer:
+    type: symbolic
+    expr: "2*(-1)**(n+1)/n"
+    symbols: [n]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes b_n = (1/pi) int_{-pi}^{pi} x sin(nx) dx and uses oddness or integrates by parts correctly" }
+    - { points: 2, criterion: "Evaluates cos(n pi) = (-1)^n correctly" }
+  reference_solution: |
+    b_n = (1/pi) int_{-pi}^{pi} x sin(nx) dx = (2/pi) int_0^pi x sin(nx) dx
+        = (2/pi) [ -x cos(nx)/n ]_0^pi + (2/pi) int_0^pi cos(nx)/n dx = -2 cos(n pi)/n = 2 (-1)^{n+1}/n.
+    ANSWER: 2*(-1)**(n+1)/n
+  concepts: [Fourier series convergence]
+
+- id: p1.pde.003
+  module: p1.pde
+  kind: proof
+  difficulty: 4
+  statement: |
+    Let u solve u_t = k u_xx on [0, L] with u(0,t) = u(L,t) = 0 and k > 0. Prove that the
+    energy E(t) = int_0^L u^2 dx is non-increasing, and deduce uniqueness of solutions of the
+    initial-boundary value problem.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Differentiates under the integral: E' = 2 int u u_t = 2k int u u_xx" }
+      - { points: 3, criterion: "Integrates by parts and uses the boundary conditions to get E' = -2k int u_x^2 <= 0" }
+      - { points: 3, criterion: "Uniqueness: the difference w of two solutions has zero data, so E_w(t) <= E_w(0) = 0, hence w = 0" }
+      - { points: 1, criterion: "States the regularity assumed for differentiating under the integral" }
+  reference_solution: |
+    E'(t) = 2 int_0^L u u_t dx = 2k int_0^L u u_xx dx = 2k [u u_x]_0^L - 2k int_0^L u_x^2 dx = -2k int_0^L u_x^2 dx <= 0,
+    using u = 0 at both ends. If u_1, u_2 solve the problem with the same data, w = u_1 - u_2 solves it with
+    zero initial and boundary data, so E_w(t) <= E_w(0) = 0, which forces w = 0.
+  concepts: [classification of second-order linear PDEs, Green's functions]
+
+- id: p1.pde.004
+  module: p1.pde
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Solve u_tt = c^2 u_xx on the whole line with u(x,0) = 0 and u_t(x,0) = cos(x).
+    End with "ANSWER: <expression in x, t, c>".
+  answer:
+    type: symbolic
+    expr: "cos(x)*sin(c*t)/c"
+    symbols: [x, t, c]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes d'Alembert's formula u = (1/2c) int_{x-ct}^{x+ct} psi(s) ds" }
+    - { points: 2, criterion: "Evaluates the integral and simplifies with a sum-to-product identity" }
+  reference_solution: |
+    u = (1/(2c)) int_{x-ct}^{x+ct} cos(s) ds = (sin(x+ct) - sin(x-ct))/(2c) = cos(x) sin(ct)/c.
+    ANSWER: cos(x)*sin(c*t)/c
+  concepts: [d'Alembert's solution of the wave equation]
+
+- id: p1.pde.005
+  module: p1.pde
+  kind: short
+  difficulty: 3
+  statement: |
+    Classify the equation u_xx + 4 u_xy + u_yy = 0 as elliptic, parabolic, or hyperbolic,
+    and name a physical equation of the same type.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Computes the discriminant B^2 - 4AC with B = 4, A = C = 1, giving 12 > 0" }
+      - { points: 2, criterion: "Classifies as hyperbolic" }
+      - { points: 1, criterion: "Names the wave equation (or another hyperbolic example)" }
+  reference_solution: |
+    With A = 1, B = 4, C = 1, B^2 - 4AC = 16 - 4 = 12 > 0, so the equation is hyperbolic, like the wave equation.
+  concepts: [classification of second-order linear PDEs]

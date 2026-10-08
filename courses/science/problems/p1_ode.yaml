@@ -1,0 +1,106 @@
+- id: p1.ode.001
+  module: p1.ode
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Solve y' + 2y = e^{-t} with y(0) = 0. Show the method. End with "ANSWER: <expression in t>".
+  answer:
+    type: symbolic
+    expr: "exp(-t) - exp(-2*t)"
+    symbols: [t]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses an integrating factor e^{2t} (or variation of parameters) correctly" }
+    - { points: 2, criterion: "Applies the initial condition correctly" }
+  reference_solution: |
+    Multiply by e^{2t}: (y e^{2t})' = e^{t}, so y e^{2t} = e^{t} + C. y(0) = 0 gives C = -1.
+    ANSWER: exp(-t) - exp(-2*t)
+  concepts: [matrix exponential and linear systems]
+
+- id: p1.ode.002
+  module: p1.ode
+  kind: short
+  difficulty: 3
+  statement: |
+    Classify the fixed point at the origin of x' = x - y, y' = x + y, and sketch the phase
+    portrait in words (direction of rotation, growth or decay).
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Finds the Jacobian [[1,-1],[1,1]] and its eigenvalues 1 +/- i" }
+      - { points: 3, criterion: "Classifies as an unstable spiral (unstable focus) because the real part is positive and the eigenvalues are complex" }
+      - { points: 2, criterion: "Determines the rotation sense correctly: at (1,0) the velocity is (1,1), so counterclockwise" }
+  reference_solution: |
+    The matrix is [[1,-1],[1,1]] with trace 2, determinant 2, eigenvalues 1 +/- i: complex with positive real
+    part, so the origin is an unstable spiral. At (1,0) the velocity is (1,1), so trajectories rotate
+    counterclockwise while spiraling outward.
+  concepts: [classification of fixed points in the plane]
+
+- id: p1.ode.003
+  module: p1.ode
+  kind: proof
+  difficulty: 4
+  statement: |
+    Consider x' = -y - x^3, y' = x - y^3. Show that linearization at the origin is inconclusive,
+    then prove the origin is asymptotically stable using a Lyapunov function.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Jacobian at 0 is [[0,-1],[1,0]] with eigenvalues +/- i, a center for the linearization, so Hartman-Grobman does not apply" }
+      - { points: 3, criterion: "Proposes V = x^2 + y^2 and verifies it is positive definite" }
+      - { points: 3, criterion: "Computes V' = -2x^4 - 2y^4, which is negative definite" }
+      - { points: 1, criterion: "Concludes asymptotic stability by Lyapunov's theorem, stating the version used" }
+  reference_solution: |
+    The Jacobian at the origin is [[0,-1],[1,0]], eigenvalues +/- i, a nonhyperbolic fixed point, so
+    linearization decides nothing. Let V = x^2 + y^2. Then V' = 2x(-y - x^3) + 2y(x - y^3) = -2x^4 - 2y^4,
+    which is negative definite. By Lyapunov's direct method the origin is asymptotically stable.
+  concepts: [Lyapunov functions, linearization and the Hartman-Grobman theorem]
+
+- id: p1.ode.004
+  module: p1.ode
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Let A = [[0, 1], [-1, 0]]. Compute the (1, 1) entry of the matrix exponential e^{At}.
+    End with "ANSWER: <expression in t>".
+  answer:
+    type: symbolic
+    expr: "cos(t)"
+    symbols: [t]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses the power series with A^2 = -I, or diagonalizes with eigenvalues +/- i, or solves the system x'' = -x" }
+    - { points: 2, criterion: "Identifies e^{At} as the rotation matrix [[cos t, sin t], [-sin t, cos t]]" }
+  reference_solution: |
+    A^2 = -I, so e^{At} = I cos t + A sin t = [[cos t, sin t], [-sin t, cos t]].
+    ANSWER: cos(t)
+  concepts: [matrix exponential and linear systems]
+
+- id: p1.ode.005
+  module: p1.ode
+  kind: code
+  difficulty: 3
+  statement: |
+    Write `integrate(f, t0, y0, t1, n)` that integrates the scalar ODE y' = f(t, y) from t0 to t1
+    with n steps of the classical fourth-order Runge-Kutta method and returns y(t1).
+  answer:
+    type: code
+    entry_point: integrate
+    tests:
+      - { call: "round(integrate(lambda t, y: y, 0.0, 1.0, 1.0, 100), 5)", expected: "2.71828" }
+      - { call: "round(integrate(lambda t, y: -2*y, 0.0, 1.0, 1.0, 200), 6)", expected: "0.135335" }
+      - { call: "round(integrate(lambda t, y: t, 0.0, 0.0, 2.0, 10), 8)", expected: "2.0" }
+  points: 10
+  reference_solution: |
+    def integrate(f, t0, y0, t1, n):
+        h = (t1 - t0) / n
+        t, y = t0, y0
+        for _ in range(n):
+            k1 = f(t, y)
+            k2 = f(t + h/2, y + h*k1/2)
+            k3 = f(t + h/2, y + h*k2/2)
+            k4 = f(t + h, y + h*k3)
+            y += h * (k1 + 2*k2 + 2*k3 + k4) / 6
+            t += h
+        return y
+  concepts: [existence and uniqueness (Picard-Lindelöf)]

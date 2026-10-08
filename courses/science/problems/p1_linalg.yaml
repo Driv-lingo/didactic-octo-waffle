@@ -1,0 +1,135 @@
+- id: p1.linalg.001
+  module: p1.linalg
+  kind: symbolic
+  difficulty: 2
+  statement: |
+    Let A = [[4, 1], [2, 3]]. Find the largest eigenvalue of A. Show the characteristic
+    polynomial. End with "ANSWER: <value>".
+  answer:
+    type: symbolic
+    expr: "5"
+    symbols: []
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Characteristic polynomial lambda^2 - 7 lambda + 10 is derived correctly" }
+    - { points: 1, criterion: "Both roots 2 and 5 are found" }
+  reference_solution: |
+    det(A - lambda I) = (4 - lambda)(3 - lambda) - 2 = lambda^2 - 7 lambda + 10 = (lambda - 5)(lambda - 2).
+    ANSWER: 5
+  concepts: [eigenvalues and diagonalizability]
+
+- id: p1.linalg.002
+  module: p1.linalg
+  kind: proof
+  difficulty: 4
+  statement: |
+    Let T be a linear operator on a vector space V, and let v_1, ..., v_k be eigenvectors
+    of T with distinct eigenvalues lambda_1, ..., lambda_k. Prove that v_1, ..., v_k are
+    linearly independent.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Sets up an induction on k, or a minimal-counterexample argument, with the base case handled" }
+      - { points: 4, criterion: "Applies T to a dependence relation and subtracts lambda_k times the relation to eliminate v_k, obtaining a shorter relation with coefficients (lambda_i - lambda_k) a_i" }
+      - { points: 2, criterion: "Uses distinctness to conclude the a_i vanish for i < k, then a_k = 0 because v_k is nonzero" }
+      - { points: 2, criterion: "The argument is complete and uses that eigenvectors are nonzero by definition" }
+  reference_solution: |
+    Induct on k. k = 1 holds because v_1 is nonzero. Suppose the statement holds for k - 1 and
+    a_1 v_1 + ... + a_k v_k = 0. Apply T: a_1 lambda_1 v_1 + ... + a_k lambda_k v_k = 0. Subtract lambda_k
+    times the original relation: sum_{i<k} a_i (lambda_i - lambda_k) v_i = 0. By the inductive hypothesis
+    each a_i (lambda_i - lambda_k) = 0, and since the eigenvalues are distinct, a_i = 0 for i < k.
+    Then a_k v_k = 0 and v_k is nonzero, so a_k = 0.
+  concepts: [eigenvalues and diagonalizability, linear independence, basis, dimension]
+
+- id: p1.linalg.003
+  module: p1.linalg
+  kind: proof
+  difficulty: 4
+  statement: |
+    Let T be a self-adjoint operator on a finite-dimensional complex inner product space.
+    Prove that every eigenvalue of T is real and that eigenvectors belonging to distinct
+    eigenvalues are orthogonal.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 4, criterion: "For Tv = lambda v with v nonzero: lambda <v,v> = <Tv,v> = <v,Tv> = conj(lambda) <v,v>, so lambda is real" }
+      - { points: 4, criterion: "For Tv = lambda v, Tw = mu w: lambda <v,w> = <Tv,w> = <v,Tw> = mu <v,w> (using that mu is real), so (lambda - mu)<v,w> = 0" }
+      - { points: 2, criterion: "Concludes <v,w> = 0 from lambda != mu, and the conjugate-linearity conventions are handled correctly" }
+  reference_solution: |
+    If Tv = lambda v, v != 0: lambda <v,v> = <Tv,v> = <v,Tv> = <v, lambda v> = conj(lambda) <v,v>, and
+    <v,v> > 0 forces lambda = conj(lambda). If Tv = lambda v and Tw = mu w with lambda != mu, then
+    lambda <v,w> = <Tv,w> = <v,Tw> = <v, mu w> = conj(mu) <v,w> = mu <v,w> since mu is real.
+    So (lambda - mu) <v,w> = 0 and <v,w> = 0.
+  concepts: [spectral theorem for self-adjoint operators, inner product spaces and orthogonal projection]
+
+- id: p1.linalg.004
+  module: p1.linalg
+  kind: numeric
+  difficulty: 3
+  statement: |
+    Compute the 2-norm condition number of A = [[1, 2], [2, 4.001]] to three significant
+    figures. Explain in one sentence what it implies for solving Ax = b in double precision.
+    End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 25008
+    rel_tol: 0.02
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses that A is symmetric so the 2-norm condition number is the ratio of the absolute eigenvalues, or computes singular values" }
+    - { points: 2, criterion: "States that about log10(cond) ~ 4.4 digits of accuracy are lost, leaving roughly 11 to 12 correct digits of 16" }
+  reference_solution: |
+    A is symmetric with trace 5.001 and determinant 0.001, so the eigenvalues are
+    (5.001 +/- sqrt(5.001^2 - 0.004))/2 ~ 5.0008 and 0.00020. The condition number is their ratio,
+    about 2.50e4. Solving Ax = b loses about 4.4 of the 16 decimal digits available.
+    ANSWER: 25008
+  concepts: [condition number and floating-point error]
+
+- id: p1.linalg.005
+  module: p1.linalg
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Let P be the orthogonal projection of R^3 onto the line spanned by (1, 2, 2).
+    Find the (1, 2) entry of the matrix of P in the standard basis. End with "ANSWER: <value>".
+  answer:
+    type: symbolic
+    expr: "2/9"
+    symbols: []
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Writes P = u u^T / (u^T u) with u = (1,2,2), u^T u = 9" }
+    - { points: 1, criterion: "Reads off the entry correctly" }
+  reference_solution: |
+    P = u u^T / (u^T u) with u = (1, 2, 2) and u^T u = 9. The (1,2) entry is u_1 u_2 / 9 = 2/9.
+    ANSWER: 2/9
+  concepts: [inner product spaces and orthogonal projection]
+
+- id: p1.linalg.006
+  module: p1.linalg
+  kind: code
+  difficulty: 3
+  statement: |
+    In pure Python (no numpy), write `dominant_eigenvalue(A, iters=500)` that returns the
+    eigenvalue of largest magnitude of a square matrix A (a list of lists of floats) by
+    power iteration with normalization, using the Rayleigh quotient for the estimate.
+    Assume a unique dominant eigenvalue.
+  answer:
+    type: code
+    entry_point: dominant_eigenvalue
+    tests:
+      - { call: "round(dominant_eigenvalue([[2.0, 1.0], [1.0, 2.0]]), 4)", expected: "3.0" }
+      - { call: "round(dominant_eigenvalue([[4.0, 1.0], [2.0, 3.0]]), 3)", expected: "5.0" }
+      - { call: "round(dominant_eigenvalue([[2.0, 0.0, 0.0], [0.0, 3.0, 4.0], [0.0, 4.0, 9.0]]), 3)", expected: "11.0" }
+  points: 10
+  reference_solution: |
+    def dominant_eigenvalue(A, iters=500):
+        n = len(A)
+        v = [1.0 / (i + 1) for i in range(n)]
+        for _ in range(iters):
+            w = [sum(A[i][j] * v[j] for j in range(n)) for i in range(n)]
+            norm = sum(x * x for x in w) ** 0.5
+            v = [x / norm for x in w]
+        w = [sum(A[i][j] * v[j] for j in range(n)) for i in range(n)]
+        return sum(v[i] * w[i] for i in range(n)) / sum(x * x for x in v)
+  concepts: [eigenvalues and diagonalizability, condition number and floating-point error]

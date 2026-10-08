@@ -1,0 +1,225 @@
+- id: p3.signals.001
+  module: p3.signals
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    A system has transfer function H(s) = 1/(s + a) with a > 0. Find its unit step response y(t)
+    for t >= 0. End with "ANSWER: <expression in a, t>".
+  answer:
+    type: symbolic
+    expr: "(1 - exp(-a*t))/a"
+    symbols: [a, t]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Multiplies by 1/s and performs partial fractions: (1/a)(1/s - 1/(s + a))" }
+    - { points: 2, criterion: "Inverts the Laplace transform correctly" }
+  reference_solution: |
+    Y(s) = 1/(s(s + a)) = (1/a)(1/s - 1/(s + a)), so y(t) = (1 - e^{-at})/a.
+    ANSWER: (1 - exp(-a*t))/a
+  concepts: [Laplace, Fourier, and z transforms, convolution and LTI systems]
+
+- id: p3.signals.002
+  module: p3.signals
+  kind: numeric
+  difficulty: 4
+  statement: |
+    The open-loop transfer function L(s) = K / (s (s + 1)(s + 2)) is placed in a unity negative
+    feedback loop. Find the largest K for which the closed loop is stable, using the phase
+    crossover frequency and the gain margin. End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 6
+    rel_tol: 0.01
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Finds the phase crossover at omega = sqrt(2) where the phase is -180 degrees" }
+    - { points: 2, criterion: "Computes |L(j sqrt 2)| = K/6 and sets it to 1 (or confirms via Routh-Hurwitz on s^3 + 3s^2 + 2s + K)" }
+  reference_solution: |
+    Phase of L(j omega) is -90 - atan(omega) - atan(omega/2), which equals -180 degrees when
+    atan(omega) + atan(omega/2) = 90 degrees, i.e. omega^2 = 2. |L(j sqrt 2)| = K/(sqrt 2 * sqrt 3 * sqrt 6) = K/6.
+    Stability needs K/6 < 1, so K < 6. Routh on s^3 + 3s^2 + 2s + K confirms: 6 - K > 0.
+    ANSWER: 6
+  concepts: [Bode and Nyquist stability criteria]
+
+- id: p3.signals.003
+  module: p3.signals
+  kind: proof
+  difficulty: 4
+  statement: |
+    A stable plant P(s) with P(0) = p0 (finite, nonzero) is controlled by C(s) = Kp + Ki/s in unity
+    negative feedback. Prove that if the closed loop is stable, the steady-state error to a unit step
+    reference is zero, and explain why proportional control alone cannot achieve this.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Writes the error transfer function E(s)/R(s) = 1/(1 + C(s)P(s))" }
+      - { points: 3, criterion: "Applies the final value theorem (justified by closed-loop stability): e_ss = lim s->0 s * (1/s) / (1 + C P) = 1/(1 + lim C P) = 0 since C P -> infinity" }
+      - { points: 2, criterion: "For C = Kp: e_ss = 1/(1 + Kp p0), nonzero for finite Kp" }
+      - { points: 2, criterion: "Interprets: the integrator provides infinite DC loop gain, i.e. the error must vanish for the controller output to settle" }
+  reference_solution: |
+    E/R = 1/(1 + CP). With R = 1/s and the closed loop stable, the final value theorem gives
+    e_ss = lim_{s->0} 1/(1 + C(s)P(s)). C(s)P(s) ~ Ki p0 / s -> infinity, so e_ss = 0. With C = Kp only,
+    e_ss = 1/(1 + Kp p0) > 0. The integrator's output can only be constant when its input, the error, is zero.
+  concepts: [PID design and its limits]
+
+- id: p3.emdev.001
+  module: p3.emdev
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Find the -3 dB cutoff frequency in hertz of a first-order RC low-pass filter.
+    End with "ANSWER: <expression in R, C>".
+  answer:
+    type: symbolic
+    expr: "1/(2*pi*R*C)"
+    symbols: [R, C]
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Derives |H| = 1/sqrt(1 + (omega R C)^2) and sets it to 1/sqrt 2" }
+  reference_solution: |
+    H = 1/(1 + j omega R C). |H| = 1/sqrt 2 when omega R C = 1, so f_c = 1/(2 pi R C).
+    ANSWER: 1/(2*pi*R*C)
+  concepts: [impedance and frequency response]
+
+- id: p3.emdev.002
+  module: p3.emdev
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    For a diode obeying I = I_s (exp(V/(n V_T)) - 1), find the small-signal resistance at a forward
+    bias current I much larger than I_s. End with "ANSWER: <expression in n, VT, I>".
+  answer:
+    type: symbolic
+    expr: "n*VT/I"
+    symbols: [n, VT, I]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Differentiates: dI/dV = (I + I_s)/(n V_T)" }
+    - { points: 2, criterion: "Drops I_s against I and inverts" }
+  reference_solution: |
+    dI/dV = I_s exp(V/(n V_T))/(n V_T) = (I + I_s)/(n V_T) ~ I/(n V_T). r_d = n V_T / I.
+    ANSWER: n*VT/I
+  concepts: [p-n junction and the diode equation]
+
+- id: p3.continuum.001
+  module: p3.continuum
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Derive the volumetric flow rate for fully developed laminar flow of a fluid with viscosity mu
+    through a circular pipe of radius R and length L under pressure drop dP.
+    End with "ANSWER: <expression in R, dP, mu, L>".
+  answer:
+    type: symbolic
+    expr: "pi*R**4*dP/(8*mu*L)"
+    symbols: [R, dP, mu, L]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Reduces Navier-Stokes to (mu/r) d/dr (r du/dr) = -dP/L and solves with u(R) = 0 and regularity at r = 0 to get the parabolic profile" }
+    - { points: 2, criterion: "Integrates u over the cross-section correctly" }
+  reference_solution: |
+    u(r) = (dP/(4 mu L))(R^2 - r^2). Q = int_0^R u 2 pi r dr = pi R^4 dP / (8 mu L).
+    ANSWER: pi*R**4*dP/(8*mu*L)
+  concepts: [Poiseuille and Couette flow, Navier-Stokes equations]
+
+- id: p3.continuum.002
+  module: p3.continuum
+  kind: numeric
+  difficulty: 3
+  statement: |
+    Water (kinematic viscosity 1e-6 m^2/s) flows at mean speed 0.5 m/s through a pipe of diameter
+    1 cm. Compute the Reynolds number and state whether the flow is expected to be laminar.
+    End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 5000
+    rel_tol: 0.02
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Uses Re = U D / nu with the diameter, and states that 5000 is above the ~2300 laminar limit, so transitional or turbulent" }
+  reference_solution: |
+    Re = 0.5 * 0.01 / 1e-6 = 5000, above the laminar threshold of about 2300, so turbulent or transitional.
+    ANSWER: 5000
+  concepts: [Reynolds number and dimensional analysis]
+
+- id: p3.continuum.003
+  module: p3.continuum
+  kind: proof
+  difficulty: 4
+  statement: |
+    Starting from conservation of linear momentum for an arbitrary material volume and the existence
+    of a stress tensor sigma (Cauchy's stress theorem), derive Cauchy's equation of motion
+    rho Dv/Dt = div sigma + rho b.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Writes momentum balance: d/dt int rho v dV = int rho b dV + int t dA with traction t = sigma . n" }
+      - { points: 3, criterion: "Applies the divergence theorem to the surface term and the Reynolds transport theorem (or mass conservation) to the time derivative" }
+      - { points: 3, criterion: "Argues the integrand must vanish for an arbitrary volume (localization)" }
+      - { points: 1, criterion: "Comments on the regularity assumed for localization" }
+  reference_solution: |
+    d/dt int_V rho v dV = int_V rho b dV + int_dV sigma . n dA. Reynolds transport with mass conservation
+    turns the left side into int_V rho Dv/Dt dV; the divergence theorem turns the traction term into
+    int_V div sigma dV. The volume is arbitrary and the integrands are continuous, so rho Dv/Dt = div sigma + rho b.
+  concepts: [stress tensor and Cauchy's equation]
+
+- id: p3.heat.001
+  module: p3.heat
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    A body of density rho, volume V, specific heat c, and surface area A at initial temperature T0
+    cools in a fluid at Tinf with convection coefficient h. Under the lumped-capacitance assumption,
+    find T(t) - Tinf. End with "ANSWER: <expression in T0, Tinf, h, A, t, rho, V, c>".
+  answer:
+    type: symbolic
+    expr: "(T0 - Tinf)*exp(-h*A*t/(rho*V*c))"
+    symbols: [T0, Tinf, h, A, t, rho, V, c]
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Writes the energy balance rho V c dT/dt = -h A (T - Tinf) and solves it" }
+  reference_solution: |
+    rho V c dT/dt = -h A (T - Tinf) gives T - Tinf = (T0 - Tinf) exp(-h A t / (rho V c)).
+    ANSWER: (T0 - Tinf)*exp(-h*A*t/(rho*V*c))
+  concepts: [lumped capacitance and the Biot number]
+
+- id: p3.heat.002
+  module: p3.heat
+  kind: numeric
+  difficulty: 4
+  statement: |
+    A steel sphere (k = 50 W/m K) of diameter 2 cm cools in air with h = 100 W/m^2 K. Compute the
+    Biot number using the characteristic length Lc = V/A and state whether lumped capacitance is
+    valid. End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 0.00667
+    rel_tol: 0.05
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Lc = r/3 = 3.33 mm for a sphere" }
+    - { points: 2, criterion: "Bi = h Lc / k = 0.0067 < 0.1, so lumped capacitance is valid" }
+  reference_solution: |
+    Lc = V/A = r/3 = 0.00333 m. Bi = 100 * 0.00333 / 50 = 0.0067, well below 0.1, so the lumped model holds.
+    ANSWER: 0.00667
+  concepts: [lumped capacitance and the Biot number]
+
+- id: p3.heat.003
+  module: p3.heat
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    A point release of solute diffuses in one dimension with diffusivity D. Find the root-mean-square
+    displacement after time t. End with "ANSWER: <expression in D, t>".
+  answer:
+    type: symbolic
+    expr: "sqrt(2*D*t)"
+    symbols: [D, t]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes the Gaussian solution of the diffusion equation with variance 2Dt, or derives <x^2> = 2Dt from the diffusion equation by moments" }
+    - { points: 2, criterion: "Takes the square root and notes the factor 2 per dimension" }
+  reference_solution: |
+    c(x,t) = (4 pi D t)^{-1/2} exp(-x^2/(4Dt)), a Gaussian with variance 2Dt. x_rms = sqrt(2Dt).
+    ANSWER: sqrt(2*D*t)
+  concepts: [Fick's law and diffusion]

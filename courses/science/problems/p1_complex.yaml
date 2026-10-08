@@ -1,0 +1,99 @@
+- id: p1.complex.001
+  module: p1.complex
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Evaluate int_{-inf}^{inf} dx / (x^2 + 1)^2 by residues. Justify closing the contour.
+    End with "ANSWER: <expression>".
+  answer:
+    type: symbolic
+    expr: "pi/2"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Closes in the upper half-plane and bounds the arc contribution by Jordan's lemma or an ML estimate" }
+    - { points: 2, criterion: "Computes the residue at the double pole z = i correctly as 1/(4i)" }
+  reference_solution: |
+    f(z) = 1/(z^2 + 1)^2 has a double pole at z = i in the upper half-plane. Res = d/dz [1/(z + i)^2] at z = i
+    = -2/(2i)^3 = 1/(4i). The arc contributes 0 since |f| ~ R^{-4}. Integral = 2 pi i * 1/(4i) = pi/2.
+    ANSWER: pi/2
+  concepts: [residue evaluation of real integrals, Laurent series and residues]
+
+- id: p1.complex.002
+  module: p1.complex
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Evaluate int_0^{2 pi} d theta / (2 + cos theta) by substituting z = e^{i theta}.
+    End with "ANSWER: <expression>".
+  answer:
+    type: symbolic
+    expr: "2*pi/sqrt(3)"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Converts to a contour integral over the unit circle: cos theta = (z + 1/z)/2, d theta = dz/(iz)" }
+    - { points: 2, criterion: "Finds the pole inside the circle at z = -2 + sqrt(3) and its residue correctly" }
+  reference_solution: |
+    With z = e^{i theta}: integral = (2/i) oint dz / (z^2 + 4z + 1). Poles at z = -2 +/- sqrt(3); only
+    -2 + sqrt(3) lies inside. Residue there is 1/(2 sqrt(3)). Integral = (2/i) * 2 pi i * 1/(2 sqrt 3) = 2 pi / sqrt 3.
+    ANSWER: 2*pi/sqrt(3)
+  concepts: [residue evaluation of real integrals]
+
+- id: p1.complex.003
+  module: p1.complex
+  kind: proof
+  difficulty: 4
+  statement: |
+    State Liouville's theorem and use it to prove the fundamental theorem of algebra.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "States Liouville: a bounded entire function is constant" }
+      - { points: 3, criterion: "Supposes a nonconstant polynomial p has no zero, so 1/p is entire" }
+      - { points: 3, criterion: "Shows |p(z)| -> infinity as |z| -> infinity, so 1/p is bounded (bounded on a large disc by continuity, small outside)" }
+      - { points: 2, criterion: "Concludes 1/p is constant, hence p is constant, a contradiction" }
+  reference_solution: |
+    Liouville: every bounded entire function is constant. Let p be a nonconstant polynomial of degree n with
+    leading coefficient a_n and suppose p has no zero. Then 1/p is entire. For large |z|,
+    |p(z)| >= |a_n||z|^n / 2, so 1/p -> 0 at infinity and is bounded outside some disc; inside the disc it is
+    bounded by continuity. So 1/p is bounded and entire, hence constant, so p is constant. Contradiction.
+  concepts: [Cauchy's integral theorem and formula]
+
+- id: p1.complex.004
+  module: p1.complex
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Find the residue of e^z / z^3 at z = 0. End with "ANSWER: <value>".
+  answer:
+    type: symbolic
+    expr: "1/2"
+    symbols: []
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Expands e^z and reads off the coefficient of 1/z, or uses the pole-of-order-3 formula" }
+  reference_solution: |
+    e^z / z^3 = 1/z^3 + 1/z^2 + 1/(2z) + ..., so the residue is 1/2.
+    ANSWER: 1/2
+  concepts: [Laurent series and residues]
+
+- id: p1.complex.005
+  module: p1.complex
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Evaluate int_0^{inf} cos(x) / (x^2 + 1) dx. End with "ANSWER: <expression>".
+  answer:
+    type: symbolic
+    expr: "pi/(2*e)"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses evenness to write the integral as half of int_{-inf}^{inf} and replaces cos x with Re e^{ix}" }
+    - { points: 2, criterion: "Closes in the upper half-plane (Jordan's lemma) and takes the residue of e^{iz}/(z^2+1) at z = i, which is e^{-1}/(2i)" }
+  reference_solution: |
+    int_{-inf}^{inf} e^{ix}/(x^2+1) dx = 2 pi i * e^{-1}/(2i) = pi/e, closing above by Jordan's lemma.
+    Taking the real part and halving: pi/(2e).
+    ANSWER: pi/(2*e)
+  concepts: [residue evaluation of real integrals]

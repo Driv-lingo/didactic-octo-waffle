@@ -1,0 +1,148 @@
+- id: p3.cellbio.001
+  module: p3.cellbio
+  kind: numeric
+  difficulty: 4
+  statement: |
+    A protein with diffusion coefficient D = 10 um^2/s must cross an E. coli cell 1 um long. Using
+    the one-dimensional estimate t = L^2 / (2D), compute the diffusion time in seconds and comment on
+    whether diffusion alone suffices for intracellular transport at this scale.
+    End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 0.05
+    rel_tol: 0.1
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Correct units: 1 um^2 / (2 * 10 um^2/s) = 0.05 s" }
+    - { points: 2, criterion: "Concludes diffusion is fast enough in bacteria and contrasts with a 100 um eukaryotic cell or neuron where t scales as L^2" }
+  reference_solution: |
+    t = (1 um)^2 / (2 * 10 um^2/s) = 0.05 s. Diffusion suffices in a bacterium; at 100 um it would take
+    500 s, which is why larger cells use active transport.
+    ANSWER: 0.05
+  concepts: [diffusion-limited reaction rates]
+
+- id: p3.cellbio.002
+  module: p3.cellbio
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Derive the Nernst equilibrium potential (inside relative to outside) for an ion of valence z
+    with concentrations cout outside and cin inside, at temperature T. Use R for the gas constant
+    and F for Faraday's constant. End with "ANSWER: <expression in R, T, z, F, cout, cin>".
+  answer:
+    type: symbolic
+    expr: "R*T/(z*F)*log(cout/cin)"
+    symbols: [R, T, z, F, cout, cin]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Equates electrochemical potentials: mu0 + RT ln c_in + zF V_in = mu0 + RT ln c_out + zF V_out" }
+    - { points: 2, criterion: "Solves for V_in - V_out with the correct sign convention" }
+  reference_solution: |
+    Equilibrium: RT ln c_in + zF V_in = RT ln c_out + zF V_out, so V_in - V_out = (RT/(zF)) ln(c_out/c_in).
+    ANSWER: R*T/(z*F)*log(cout/cin)
+  concepts: [membrane potential and the Nernst equation]
+
+- id: p3.cellbio.003
+  module: p3.cellbio
+  kind: model
+  difficulty: 5
+  statement: |
+    Estimate the number of ribosomes an E. coli cell needs to double in 20 minutes. State every
+    number you assume (protein content per cell, average protein length, translation rate) and give
+    the result to one significant figure. Then compare with the measured value and explain any gap.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Assumes a protein count of order 3e6 proteins per cell with average length ~300 amino acids, giving ~1e9 peptide bonds per doubling" }
+      - { points: 3, criterion: "Uses a translation rate of order 20 amino acids per second per ribosome, so each ribosome makes ~2e4 bonds in 1200 s" }
+      - { points: 2, criterion: "Divides to get ~5e4 ribosomes, within a factor of a few of measured values (1e4 to 7e4 depending on growth rate)" }
+      - { points: 2, criterion: "Explains the gap sensibly: not all ribosomes are active, growth-rate dependence, protein turnover" }
+  reference_solution: |
+    ~3e6 proteins per cell x 300 aa = 1e9 peptide bonds per doubling. One ribosome at 20 aa/s makes
+    20 x 1200 = 2.4e4 bonds in 20 minutes. Required ribosomes ~ 1e9 / 2.4e4 ~ 4e4. Measured: tens of
+    thousands at fast growth, consistent; differences come from the active fraction and growth-rate scaling
+    of ribosome content.
+  concepts: [central dogma and its error rates, ATP hydrolysis and free energy budgets]
+
+- id: p3.cellbio.004
+  module: p3.cellbio
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    In a haploid population, allele A has fitness 1 + s and allele a has fitness 1. If A has
+    frequency p this generation, find its frequency next generation under selection alone.
+    End with "ANSWER: <expression in p, s>".
+  answer:
+    type: symbolic
+    expr: "p*(1 + s)/(1 + p*s)"
+    symbols: [p, s]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Weights frequencies by fitness and normalizes by mean fitness 1 + ps" }
+    - { points: 2, criterion: "Checks limits: s = 0 gives p, small s gives Delta p ~ s p (1 - p)" }
+  reference_solution: |
+    p' = p(1 + s) / (p(1 + s) + (1 - p)) = p(1 + s)/(1 + ps). For small s, Delta p ~ s p (1 - p).
+    ANSWER: p*(1 + s)/(1 + p*s)
+  concepts: [population genetics and selection coefficients]
+
+- id: p3.physio.001
+  module: p3.physio
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Treating the systemic circulation as a resistor, express systemic vascular resistance SVR in
+    terms of mean arterial pressure MAP, central venous pressure CVP, and cardiac output CO.
+    End with "ANSWER: <expression in MAP, CVP, CO>".
+  answer:
+    type: symbolic
+    expr: "(MAP - CVP)/CO"
+    symbols: [MAP, CVP, CO]
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Identifies the pressure drop across the systemic bed as MAP - CVP and applies the Ohm's-law analogy" }
+  reference_solution: |
+    Flow = pressure drop / resistance, so SVR = (MAP - CVP)/CO.
+    ANSWER: (MAP - CVP)/CO
+  concepts: [cardiovascular system as a circuit]
+
+- id: p3.physio.002
+  module: p3.physio
+  kind: numeric
+  difficulty: 4
+  statement: |
+    Compute the potassium equilibrium potential in millivolts at 37 C for [K+]_in = 140 mM and
+    [K+]_out = 5 mM. End with "ANSWER: <number in mV>".
+  answer:
+    type: numeric
+    value: -89
+    rel_tol: 0.03
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses RT/F at 310 K = 26.7 mV" }
+    - { points: 2, criterion: "Takes ln(5/140) = -3.33 and gets about -89 mV with the correct sign" }
+  reference_solution: |
+    E_K = (RT/F) ln(c_out/c_in) = 26.7 mV x ln(5/140) = 26.7 x (-3.33) = -89 mV.
+    ANSWER: -89
+  concepts: [Hodgkin-Huxley model, membrane potential and the Nernst equation]
+
+- id: p3.physio.003
+  module: p3.physio
+  kind: numeric
+  difficulty: 4
+  statement: |
+    A biopotential amplifier sees a 10 kOhm electrode-tissue source resistance at 310 K over a 1 kHz
+    bandwidth. Compute the thermal (Johnson) noise voltage in volts RMS, and say whether a 10 uV ECG
+    feature is resolvable against it. End with "ANSWER: <number in V>".
+  answer:
+    type: numeric
+    value: 4.14e-7
+    rel_tol: 0.05
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses v_n = sqrt(4 k T R B)" }
+    - { points: 2, criterion: "Gets about 0.41 uV and concludes 10 uV is ~24x the noise floor, resolvable, with amplifier noise as the practical limit" }
+  reference_solution: |
+    v_n = sqrt(4 x 1.38e-23 x 310 x 1e4 x 1e3) = 4.1e-7 V = 0.41 uV RMS. A 10 uV feature is well above it;
+    the amplifier's own input noise and interference usually dominate instead.
+    ANSWER: 4.14e-7
+  concepts: [biopotential amplifiers and noise]

@@ -1,0 +1,423 @@
+- id: p2.cm.001
+  module: p2.cm
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    A particle of mass m moves in the central potential V(r) = -k/r with angular momentum L.
+    Using the effective potential, find the radius of the circular orbit.
+    End with "ANSWER: <expression in L, m, k>".
+  answer:
+    type: symbolic
+    expr: "L**2/(m*k)"
+    symbols: [L, m, k]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes V_eff = L^2/(2 m r^2) - k/r" }
+    - { points: 2, criterion: "Sets dV_eff/dr = 0 and solves; checks it is a minimum" }
+  reference_solution: |
+    V_eff = L^2/(2 m r^2) - k/r. dV_eff/dr = -L^2/(m r^3) + k/r^2 = 0 gives r = L^2/(m k), a minimum since
+    the second derivative 3L^2/(m r^4) - 2k/r^3 = m k^4/L^6 > 0 there.
+    ANSWER: L**2/(m*k)
+  concepts: [principle of least action and Euler-Lagrange equations]
+
+- id: p2.cm.002
+  module: p2.cm
+  kind: proof
+  difficulty: 4
+  statement: |
+    A particle moves in the plane with Lagrangian L = (m/2)(xdot^2 + ydot^2) - V(sqrt(x^2 + y^2)).
+    Show that L is invariant under rotations about the origin and use Noether's theorem to derive
+    the conserved quantity explicitly.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Writes the infinitesimal rotation delta x = -epsilon y, delta y = epsilon x and shows delta L = 0 (both the kinetic term and r are invariant)" }
+      - { points: 4, criterion: "Applies Noether: the conserved quantity is sum (dL/dqdot_i) delta q_i / epsilon = m(x ydot - y xdot)" }
+      - { points: 3, criterion: "Identifies it as angular momentum L_z and verifies dL_z/dt = 0 directly from the equations of motion as a check" }
+  reference_solution: |
+    Under x -> x - epsilon y, y -> y + epsilon x, xdot^2 + ydot^2 and x^2 + y^2 are unchanged to first
+    order, so delta L = 0. Noether's charge Q = p_x delta x + p_y delta y with epsilon factored out:
+    Q = m xdot (-y) + m ydot (x) = m (x ydot - y xdot) = L_z. Check: dL_z/dt = m(x yddot - y xddot) =
+    -(x dV/dy - y dV/dx) = -(x y - y x) V'(r)/r = 0.
+  concepts: [Noether's theorem]
+
+- id: p2.cm.003
+  module: p2.cm
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Two equal masses m are connected in a line between two walls by three identical springs of
+    constant k (wall-spring-mass-spring-mass-spring-wall). Find the higher normal-mode frequency.
+    End with "ANSWER: <expression in k, m>".
+  answer:
+    type: symbolic
+    expr: "sqrt(3*k/m)"
+    symbols: [k, m]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes the equations of motion m x1'' = -2k x1 + k x2, m x2'' = k x1 - 2k x2" }
+    - { points: 2, criterion: "Solves the eigenvalue problem to get omega^2 = k/m (in phase) and 3k/m (out of phase)" }
+  reference_solution: |
+    The dynamical matrix is (k/m) [[2, -1], [-1, 2]] with eigenvalues k/m and 3k/m. The higher frequency is
+    sqrt(3k/m), the antisymmetric mode.
+    ANSWER: sqrt(3*k/m)
+  concepts: [normal modes]
+
+- id: p2.em.001
+  module: p2.em
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    A point charge q sits a distance d from an infinite grounded conducting plane. Find the magnitude
+    of the force on the charge. End with "ANSWER: <expression in q, d, epsilon0>".
+  answer:
+    type: symbolic
+    expr: "q**2/(16*pi*epsilon0*d**2)"
+    symbols: [q, d, epsilon0]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses the image charge -q at distance d behind the plane and justifies it by uniqueness" }
+    - { points: 2, criterion: "Computes the Coulomb force at separation 2d" }
+  reference_solution: |
+    Image -q at distance 2d from the real charge satisfies the boundary condition on the plane; by uniqueness
+    the field in the physical region is that of the pair. F = q^2 / (4 pi epsilon0 (2d)^2) = q^2/(16 pi epsilon0 d^2).
+    ANSWER: q**2/(16*pi*epsilon0*d**2)
+  concepts: [Gauss's law and the method of images]
+
+- id: p2.em.002
+  module: p2.em
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    A ring of radius R carries total charge Q uniformly. Find the potential on the axis at distance z
+    from the center. End with "ANSWER: <expression in Q, R, z, epsilon0>".
+  answer:
+    type: symbolic
+    expr: "Q/(4*pi*epsilon0*sqrt(z**2 + R**2))"
+    symbols: [Q, R, z, epsilon0]
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Notes every element of the ring is at the same distance sqrt(z^2 + R^2) and integrates the charge directly" }
+  reference_solution: |
+    V = (1/(4 pi epsilon0)) int dq / sqrt(z^2 + R^2) = Q / (4 pi epsilon0 sqrt(z^2 + R^2)).
+    ANSWER: Q/(4*pi*epsilon0*sqrt(z**2 + R**2))
+  concepts: [multipole expansion]
+
+- id: p2.em.003
+  module: p2.em
+  kind: proof
+  difficulty: 4
+  statement: |
+    Starting from Maxwell's equations in vacuum with no sources, derive the wave equation for E
+    and identify the wave speed.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Writes the four source-free Maxwell equations correctly" }
+      - { points: 4, criterion: "Takes the curl of Faraday's law and uses the identity curl curl E = grad(div E) - Laplacian E with div E = 0" }
+      - { points: 3, criterion: "Substitutes Ampere-Maxwell to get Laplacian E = mu0 epsilon0 d^2E/dt^2" }
+      - { points: 1, criterion: "Identifies c = 1/sqrt(mu0 epsilon0)" }
+  reference_solution: |
+    div E = 0, div B = 0, curl E = -dB/dt, curl B = mu0 epsilon0 dE/dt. Curl of Faraday:
+    curl curl E = -d(curl B)/dt = -mu0 epsilon0 d^2E/dt^2. The left side is grad(div E) - Laplacian E = -Laplacian E.
+    So Laplacian E = mu0 epsilon0 d^2E/dt^2, a wave equation with speed c = 1/sqrt(mu0 epsilon0).
+  concepts: [Maxwell's equations and gauge freedom, electromagnetic waves in media and at boundaries]
+
+- id: p2.qm.001
+  module: p2.qm
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    For the one-dimensional harmonic oscillator with mass m and frequency omega, compute <n| x^2 |n>
+    using ladder operators. End with "ANSWER: <expression in hbar, n, m, omega>".
+  answer:
+    type: symbolic
+    expr: "hbar*(2*n + 1)/(2*m*omega)"
+    symbols: [hbar, n, m, omega]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes x = sqrt(hbar/(2 m omega)) (a + a^dagger)" }
+    - { points: 2, criterion: "Keeps only the a a^dagger + a^dagger a terms and evaluates them as 2n + 1" }
+  reference_solution: |
+    x^2 = (hbar/(2 m omega)) (a + a^dagger)^2; only a a^dagger + a^dagger a = 2 a^dagger a + 1 survives in
+    <n|...|n>, giving hbar(2n + 1)/(2 m omega).
+    ANSWER: hbar*(2*n + 1)/(2*m*omega)
+  concepts: [ladder operators for the harmonic oscillator]
+
+- id: p2.qm.002
+  module: p2.qm
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    A harmonic oscillator (mass m, frequency omega) is perturbed by V = lam * x. Show that the
+    first-order shift of the ground-state energy vanishes and compute the second-order shift.
+    End with "ANSWER: <expression in lam, m, omega>".
+  answer:
+    type: symbolic
+    expr: "-lam**2/(2*m*omega**2)"
+    symbols: [lam, m, omega]
+  points: 4
+  method_rubric:
+    - { points: 1, criterion: "First order: <0|x|0> = 0 by parity" }
+    - { points: 2, criterion: "Second order: only |1> contributes, with |<1|x|0>|^2 = hbar/(2 m omega) and denominator -hbar omega" }
+    - { points: 1, criterion: "Notes the result is exact (completing the square shifts the oscillator)" }
+  reference_solution: |
+    E^(1) = lam <0|x|0> = 0. E^(2) = sum_{k != 0} |<k|lam x|0>|^2 / (E_0 - E_k) = lam^2 (hbar/(2 m omega)) / (-hbar omega)
+    = -lam^2/(2 m omega^2). Exact, since H = p^2/2m + (m omega^2/2)(x + lam/(m omega^2))^2 - lam^2/(2 m omega^2).
+    ANSWER: -lam**2/(2*m*omega**2)
+  concepts: [time-independent and time-dependent perturbation theory]
+
+- id: p2.qm.003
+  module: p2.qm
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Find the ground-state energy of a particle of mass m in an infinite square well of width a.
+    End with "ANSWER: <expression in hbar, m, a>".
+  answer:
+    type: symbolic
+    expr: "pi**2*hbar**2/(2*m*a**2)"
+    symbols: [hbar, m, a]
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Imposes psi = 0 at both walls to get k = n pi / a and E = hbar^2 k^2 / 2m" }
+  reference_solution: |
+    psi_n = sqrt(2/a) sin(n pi x / a), E_n = n^2 pi^2 hbar^2 / (2 m a^2). Ground state n = 1.
+    ANSWER: pi**2*hbar**2/(2*m*a**2)
+  concepts: [postulates and the measurement problem]
+
+- id: p2.sm.001
+  module: p2.sm
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    A two-level system has energies 0 and epsilon. In the canonical ensemble at inverse temperature
+    beta, find the mean energy. End with "ANSWER: <expression in epsilon, beta>".
+  answer:
+    type: symbolic
+    expr: "epsilon/(exp(beta*epsilon) + 1)"
+    symbols: [epsilon, beta]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Writes Z = 1 + e^{-beta epsilon}" }
+    - { points: 2, criterion: "Uses <E> = -d ln Z / d beta or the explicit weighted average, and simplifies" }
+  reference_solution: |
+    Z = 1 + e^{-beta epsilon}. <E> = epsilon e^{-beta epsilon} / (1 + e^{-beta epsilon}) = epsilon / (e^{beta epsilon} + 1).
+    ANSWER: epsilon/(exp(beta*epsilon) + 1)
+  concepts: [partition function and its derivatives]
+
+- id: p2.sm.002
+  module: p2.sm
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    N particles of a classical ideal gas expand isothermally from volume V to 2V. Find the change
+    in entropy. End with "ANSWER: <expression in N, k>".
+  answer:
+    type: symbolic
+    expr: "N*k*log(2)"
+    symbols: [N, k]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses the Sackur-Tetrode form S = N k ln V + f(T, N), or dS = (dU + p dV)/T with dU = 0" }
+    - { points: 2, criterion: "Integrates p/T = N k / V correctly" }
+  reference_solution: |
+    At fixed T, dU = 0, so dS = p dV / T = N k dV / V, giving Delta S = N k ln 2.
+    ANSWER: N*k*log(2)
+  concepts: [laws of thermodynamics and thermodynamic potentials]
+
+- id: p2.sm.003
+  module: p2.sm
+  kind: proof
+  difficulty: 5
+  statement: |
+    Derive the Bose-Einstein occupation number <n> for a single-particle state of energy epsilon
+    from the grand canonical ensemble at temperature T and chemical potential mu. State why mu
+    must be below the lowest single-particle energy.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Writes the grand partition function for one mode as a geometric series sum_n e^{-beta n (epsilon - mu)} = 1/(1 - e^{-beta(epsilon - mu)})" }
+      - { points: 3, criterion: "Obtains <n> = (1/beta) d ln Xi / d mu = 1/(e^{beta(epsilon - mu)} - 1)" }
+      - { points: 2, criterion: "Explains that convergence of the series requires e^{-beta(epsilon - mu)} < 1, i.e. mu < epsilon for every state" }
+      - { points: 2, criterion: "Contrasts with Fermi-Dirac (two-term sum) in one or two lines" }
+  reference_solution: |
+    For a single mode, Xi = sum_{n=0}^inf e^{-beta n (epsilon - mu)} = 1/(1 - e^{-beta(epsilon - mu)}), convergent
+    only if mu < epsilon. <n> = (1/beta) d ln Xi / d mu = e^{-beta(epsilon - mu)}/(1 - e^{-beta(epsilon - mu)})
+    = 1/(e^{beta(epsilon - mu)} - 1). For fermions the sum has only n = 0, 1, giving 1/(e^{beta(epsilon - mu)} + 1).
+  concepts: [Bose-Einstein and Fermi-Dirac statistics, microcanonical, canonical, and grand canonical ensembles]
+
+- id: p2.pchem.001
+  module: p2.pchem
+  kind: symbolic
+  difficulty: 4
+  statement: |
+    Use Hückel theory to find the pi-electron delocalization energy of 1,3-butadiene relative
+    to two isolated ethylene double bonds, in terms of the resonance integral beta (beta < 0).
+    End with "ANSWER: <expression in beta>".
+  answer:
+    type: symbolic
+    expr: "(2*sqrt(5) - 4)*beta"
+    symbols: [beta]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Sets up the 4x4 Hückel determinant and finds orbital energies alpha +/- 1.618 beta and alpha +/- 0.618 beta" }
+    - { points: 2, criterion: "Fills the two bonding orbitals with four electrons and subtracts 2(2 alpha + 2 beta) for two ethylenes" }
+  reference_solution: |
+    Butadiene orbital energies: alpha + 1.618 beta, alpha + 0.618 beta, alpha - 0.618 beta, alpha - 1.618 beta.
+    Total pi energy 2(alpha + 1.618 beta) + 2(alpha + 0.618 beta) = 4 alpha + 4.472 beta. Two ethylenes:
+    4 alpha + 4 beta. Difference 0.472 beta = (2 sqrt 5 - 4) beta.
+    ANSWER: (2*sqrt(5) - 4)*beta
+  concepts: [Hückel theory, LCAO and molecular orbital theory]
+
+- id: p2.pchem.002
+  module: p2.pchem
+  kind: numeric
+  difficulty: 4
+  statement: |
+    A reaction's rate constant doubles between 300 K and 310 K. Compute the Arrhenius activation
+    energy in J/mol. End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 53594
+    rel_tol: 0.03
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses ln(k2/k1) = -(Ea/R)(1/T2 - 1/T1)" }
+    - { points: 2, criterion: "Arithmetic is correct with R = 8.314 J/(mol K)" }
+  reference_solution: |
+    Ea = R ln 2 / (1/300 - 1/310) = 8.314 * 0.6931 / 1.0753e-4 = 5.36e4 J/mol.
+    ANSWER: 53594
+  concepts: [Arrhenius and Eyring rate equations]
+
+- id: p2.algo.001
+  module: p2.algo
+  kind: proof
+  difficulty: 4
+  statement: |
+    Prove that T(n) = 2 T(n/2) + n with T(1) = 1 satisfies T(n) = Theta(n log n), without
+    quoting the master theorem.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 4, criterion: "Upper bound by substitution: guesses T(n) <= c n log n and verifies the inductive step with the constant made explicit" }
+      - { points: 3, criterion: "Lower bound: T(n) >= c' n log n by the same method, or via the recursion tree with log n levels each costing n" }
+      - { points: 3, criterion: "Handles the base case and the fact that n is a power of two (or argues monotonicity to extend)" }
+  reference_solution: |
+    Recursion tree: level i has 2^i subproblems of size n/2^i, each costing n/2^i, total n per level, over
+    log2 n levels, plus n leaves of cost 1: T(n) = n log2 n + n. Formally, for n = 2^k, induction on k gives
+    T(2^k) = k 2^k + 2^k exactly. Monotonicity of T extends the bound to all n up to constants.
+  concepts: [asymptotic analysis and recurrences, divide and conquer]
+
+- id: p2.algo.002
+  module: p2.algo
+  kind: code
+  difficulty: 4
+  statement: |
+    Write `lis_length(seq)` returning the length of the longest strictly increasing subsequence of
+    a list of integers in O(n log n) time.
+  answer:
+    type: code
+    entry_point: lis_length
+    tests:
+      - { call: "lis_length([10, 9, 2, 5, 3, 7, 101, 18])", expected: "4" }
+      - { call: "lis_length([])", expected: "0" }
+      - { call: "lis_length([7, 7, 7])", expected: "1" }
+      - { call: "lis_length(list(range(5000)) + list(range(5000)))", expected: "5000" }
+  points: 10
+  reference_solution: |
+    from bisect import bisect_left
+    def lis_length(seq):
+        tails = []
+        for x in seq:
+            i = bisect_left(tails, x)
+            if i == len(tails):
+                tails.append(x)
+            else:
+                tails[i] = x
+        return len(tails)
+  concepts: [dynamic programming]
+
+- id: p2.algo.003
+  module: p2.algo
+  kind: proof
+  difficulty: 5
+  statement: |
+    Assuming 3-SAT is NP-complete, prove that INDEPENDENT SET (given a graph G and integer k, does
+    G have an independent set of size k?) is NP-complete.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 2, criterion: "Shows INDEPENDENT SET is in NP by giving a polynomial verifier" }
+      - { points: 4, criterion: "Gives the reduction: a triangle per clause, edges between complementary literals across triangles, k = number of clauses" }
+      - { points: 3, criterion: "Proves both directions: a satisfying assignment yields an independent set of size k, and vice versa (consistency across triangles)" }
+      - { points: 1, criterion: "Notes the reduction is polynomial time" }
+  reference_solution: |
+    In NP: a set of k vertices can be checked for pairwise non-adjacency in polynomial time. Reduction from
+    3-SAT with m clauses: for each clause make a triangle on its three literals; connect every pair of
+    vertices labeled x and not-x in different triangles; set k = m. If phi is satisfiable, pick one true
+    literal per clause: no two are in the same triangle and no two are complementary, so they form an
+    independent set of size m. Conversely, an independent set of size m takes exactly one vertex per triangle
+    and never both x and not-x, so setting those literals true is consistent and satisfies every clause.
+    The construction is polynomial in the formula size.
+  concepts: [reductions and NP-completeness]
+
+- id: p2.sys.001
+  module: p2.sys
+  kind: short
+  difficulty: 3
+  statement: |
+    Explain false sharing. Give a concrete code pattern that causes it, say why it is slow at the
+    level of the cache coherence protocol, and give the fix.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Two threads write to different variables that share a cache line (e.g. adjacent counters in an array)" }
+      - { points: 3, criterion: "Explains that coherence (MESI) invalidates the line in the other core on each write, so the line ping-pongs between caches" }
+      - { points: 2, criterion: "Fix: pad or align per-thread data to cache-line size (typically 64 bytes), or use thread-local accumulators" }
+  reference_solution: |
+    Thread A increments counts[0] and thread B increments counts[1]; both live in one 64-byte line. Each
+    write requires exclusive ownership, so MESI invalidates the other core's copy and the line bounces
+    between L1 caches on every increment. Padding each counter to its own line (alignas(64)) or
+    accumulating thread-locally and merging at the end removes the contention.
+  concepts: [memory hierarchy and cache behavior, locks, races, and deadlock]
+
+- id: p2.sys.002
+  module: p2.sys
+  kind: numeric
+  difficulty: 3
+  statement: |
+    Give the unsigned 8-bit value whose bit pattern is the two's complement representation of -37.
+    Show the complement-and-add-one step. End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 219
+    abs_tol: 0
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "37 = 00100101, complement 11011010, add one 11011011 = 219; or uses 256 - 37" }
+  reference_solution: |
+    37 = 0b00100101. Invert: 0b11011010. Add one: 0b11011011 = 219 = 256 - 37.
+    ANSWER: 219
+  concepts: [two's complement and IEEE 754]
+
+- id: p2.sys.003
+  module: p2.sys
+  kind: short
+  difficulty: 4
+  statement: |
+    Two threads each execute `counter++` 1000 times on a shared int with no synchronization.
+    Explain why the final value can be less than 2000, show an interleaving that loses an update,
+    and give two correct fixes with their costs.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Explains that counter++ compiles to load, add, store, which is not atomic" }
+      - { points: 3, criterion: "Shows an interleaving: both load 5, both add, both store 6; one increment is lost" }
+      - { points: 2, criterion: "Fix 1: a mutex around the increment, with the cost of lock contention" }
+      - { points: 2, criterion: "Fix 2: an atomic fetch-and-add, cheaper but still a serialized cache-line operation" }
+  reference_solution: |
+    counter++ is load; add 1; store. Interleaving: T1 loads 5, T2 loads 5, T1 stores 6, T2 stores 6. One
+    increment vanished. Fixes: protect with a mutex (correct, but contended lock traffic), or use an atomic
+    fetch_add (lock-free, but each operation still bounces the cache line between cores).
+  concepts: [locks, races, and deadlock, processes, threads, and scheduling]

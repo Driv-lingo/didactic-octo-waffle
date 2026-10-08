@@ -1,0 +1,152 @@
+- id: p1.compute.001
+  module: p1.compute
+  kind: code
+  difficulty: 3
+  statement: |
+    Write `newton_sqrt(a, tol=1e-12)` that computes sqrt(a) for a > 0 by Newton's method on
+    f(x) = x^2 - a, stopping when successive iterates differ by less than tol.
+  answer:
+    type: code
+    entry_point: newton_sqrt
+    tests:
+      - { call: "round(newton_sqrt(2.0), 10)", expected: "1.4142135624" }
+      - { call: "round(newton_sqrt(144.0), 10)", expected: "12.0" }
+      - { call: "round(newton_sqrt(1e-6), 12)", expected: "0.001" }
+  points: 10
+  reference_solution: |
+    def newton_sqrt(a, tol=1e-12):
+        x = a if a >= 1 else 1.0
+        while True:
+            nx = 0.5 * (x + a / x)
+            if abs(nx - x) < tol:
+                return nx
+            x = nx
+  concepts: [Newton's method and its convergence]
+
+- id: p1.compute.002
+  module: p1.compute
+  kind: code
+  difficulty: 3
+  statement: |
+    Write `interp(xs, ys, x)` that evaluates the Lagrange interpolating polynomial through the
+    points (xs[i], ys[i]) at x. Do not use numpy.
+  answer:
+    type: code
+    entry_point: interp
+    tests:
+      - { call: "round(interp([0.0, 1.0, 2.0], [1.0, 3.0, 7.0], 3.0), 9)", expected: "13.0" }
+      - { call: "round(interp([0.0, 1.0], [0.0, 2.0], 0.25), 9)", expected: "0.5" }
+      - { call: "round(interp([-1.0, 0.0, 1.0, 2.0], [-1.0, 0.0, 1.0, 8.0], 0.5), 9)", expected: "0.125" }
+  points: 10
+  reference_solution: |
+    def interp(xs, ys, x):
+        total = 0.0
+        n = len(xs)
+        for i in range(n):
+            term = ys[i]
+            for j in range(n):
+                if j != i:
+                    term *= (x - xs[j]) / (xs[i] - xs[j])
+            total += term
+        return total
+  concepts: [polynomial interpolation and Runge's phenomenon]
+
+- id: p1.compute.003
+  module: p1.compute
+  kind: code
+  difficulty: 4
+  statement: |
+    Write `simpson(f, a, b, n)` implementing composite Simpson's rule with n subintervals
+    (n even). It should be exact for cubics.
+  answer:
+    type: code
+    entry_point: simpson
+    tests:
+      - { call: "round(simpson(lambda x: x**3, 0.0, 1.0, 10), 10)", expected: "0.25" }
+      - { call: "round(simpson(lambda x: x**2, 0.0, 3.0, 2), 10)", expected: "9.0" }
+      - { call: "round(simpson(lambda x: 1.0/(1.0 + x*x), 0.0, 1.0, 100), 8)", expected: "0.78539816" }
+  points: 10
+  reference_solution: |
+    def simpson(f, a, b, n):
+        if n % 2:
+            raise ValueError("n must be even")
+        h = (b - a) / n
+        s = f(a) + f(b)
+        for i in range(1, n):
+            s += (4 if i % 2 else 2) * f(a + i * h)
+        return s * h / 3
+  concepts: [Gaussian quadrature]
+
+- id: p1.compute.004
+  module: p1.compute
+  kind: short
+  difficulty: 3
+  statement: |
+    Explain why 0.1 + 0.2 != 0.3 in IEEE 754 double precision. Say what each of the three
+    numbers actually is in binary (approximately), and state the correct way to compare floating
+    point results.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Explains that 0.1, 0.2, and 0.3 are not representable as finite binary fractions and are rounded to the nearest double" }
+      - { points: 3, criterion: "Explains that the sum of the two rounded values, rounded again, lands one ulp above the double nearest 0.3" }
+      - { points: 2, criterion: "Gives the ulp (about 5.55e-17 near 0.3) or the magnitude of the discrepancy" }
+      - { points: 2, criterion: "Recommends comparison with a relative and absolute tolerance, not equality" }
+  reference_solution: |
+    0.1 and 0.2 have infinite binary expansions, so each is stored as the nearest 53-bit-mantissa double:
+    0.1 -> 0.1000000000000000055..., 0.2 -> 0.2000000000000000111.... Their exact sum is
+    0.3000000000000000166..., which rounds to 0.30000000000000004, one ulp (5.55e-17) above the double
+    nearest 0.3 (0.29999999999999998889...). Compare with abs(a - b) <= max(rel * max(|a|,|b|), abs_tol).
+  concepts: [floating-point representation and rounding error]
+
+- id: p1.compute.005
+  module: p1.compute
+  kind: numeric
+  difficulty: 3
+  statement: |
+    Newton's method converges quadratically near a simple root. If the first iterate has about 1
+    correct significant digit, roughly how many correct digits does the fifth iterate have, assuming
+    the asymptotic regime holds throughout? End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 16
+    abs_tol: 0.5
+  points: 3
+  method_rubric:
+    - { points: 2, criterion: "Explains that quadratic convergence roughly doubles the number of correct digits per iteration" }
+    - { points: 1, criterion: "Notes that double precision caps the useful count near 16 digits" }
+  reference_solution: |
+    Doubling per iteration: 1 -> 2 -> 4 -> 8 -> 16 after four more iterations, which is also about the
+    limit of double precision.
+    ANSWER: 16
+  concepts: [Newton's method and its convergence, floating-point representation and rounding error]
+
+- id: p1.compute.006
+  module: p1.compute
+  kind: code
+  difficulty: 3
+  statement: |
+    Write `bisect(f, a, b, tol=1e-10)` that returns a root of the continuous function f in [a, b]
+    by bisection, assuming f(a) and f(b) have opposite signs, to within tol.
+  answer:
+    type: code
+    entry_point: bisect
+    tests:
+      - { call: "round(bisect(lambda x: x**3 - 2, 1.0, 2.0), 8)", expected: "1.25992105" }
+      - { call: "round(bisect(lambda x: x - 0.5, 0.0, 1.0), 8)", expected: "0.5" }
+      - { call: "round(bisect(lambda x: x*x - 9, 0.0, 10.0, 1e-12), 8)", expected: "3.0" }
+  points: 10
+  reference_solution: |
+    def bisect(f, a, b, tol=1e-10):
+        fa = f(a)
+        while b - a > tol:
+            m = 0.5 * (a + b)
+            fm = f(m)
+            if fm == 0:
+                return m
+            if (fa < 0) == (fm < 0):
+                a, fa = m, fm
+            else:
+                b = m
+        return 0.5 * (a + b)
+  concepts: [recursion and iteration, big-O analysis of simple algorithms]

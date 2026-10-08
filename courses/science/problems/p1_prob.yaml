@@ -1,0 +1,126 @@
+- id: p1.prob.001
+  module: p1.prob
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    Let X and Y be independent exponential random variables with the same rate lambda.
+    Compute P(X > 2Y). End with "ANSWER: <value>".
+  answer:
+    type: symbolic
+    expr: "1/3"
+    symbols: []
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Conditions on Y: P(X > 2Y) = int_0^inf P(X > 2y) f_Y(y) dy = int_0^inf e^{-2 lambda y} lambda e^{-lambda y} dy" }
+    - { points: 2, criterion: "Evaluates the integral and notes the answer is independent of lambda" }
+  reference_solution: |
+    P(X > 2Y) = int_0^inf e^{-2 lambda y} lambda e^{-lambda y} dy = lambda / (3 lambda) = 1/3.
+    ANSWER: 1/3
+  concepts: [conditional probability and Bayes' rule, expectation, variance, and generating functions]
+
+- id: p1.prob.002
+  module: p1.prob
+  kind: proof
+  difficulty: 4
+  statement: |
+    Let X_1, X_2, ... be i.i.d. with mean mu and finite variance sigma^2. Prove the weak law of
+    large numbers: for every epsilon > 0, P(|X_bar_n - mu| > epsilon) -> 0.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "States and proves (or correctly cites) Chebyshev's inequality from Markov's inequality" }
+      - { points: 3, criterion: "Computes Var(X_bar_n) = sigma^2 / n using independence (uncorrelatedness suffices)" }
+      - { points: 3, criterion: "Applies Chebyshev: P(|X_bar_n - mu| > epsilon) <= sigma^2 / (n epsilon^2) -> 0" }
+      - { points: 1, criterion: "Notes that finite variance is used only for this proof and the law holds with finite mean alone" }
+  reference_solution: |
+    E[X_bar_n] = mu and Var(X_bar_n) = sigma^2/n by independence. Chebyshev's inequality gives
+    P(|X_bar_n - mu| > epsilon) <= Var(X_bar_n)/epsilon^2 = sigma^2/(n epsilon^2) -> 0 as n -> infinity.
+    (Khinchin's theorem gives the result assuming only a finite mean.)
+  concepts: [law of large numbers and central limit theorem]
+
+- id: p1.prob.003
+  module: p1.prob
+  kind: symbolic
+  difficulty: 3
+  statement: |
+    A coin with unknown heads probability theta has prior Beta(a, b). You observe k heads in n
+    tosses. Find the posterior mean of theta. End with "ANSWER: <expression in a, b, k, n>".
+  answer:
+    type: symbolic
+    expr: "(a + k)/(a + b + n)"
+    symbols: [a, b, k, n]
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Multiplies prior and binomial likelihood to get a Beta(a + k, b + n - k) posterior" }
+    - { points: 2, criterion: "Uses the Beta mean alpha/(alpha + beta)" }
+  reference_solution: |
+    Posterior is proportional to theta^{a+k-1} (1-theta)^{b+n-k-1}, i.e. Beta(a+k, b+n-k), whose mean is
+    (a+k)/(a+b+n).
+    ANSWER: (a + k)/(a + b + n)
+  concepts: [Bayesian posterior and conjugate priors]
+
+- id: p1.prob.004
+  module: p1.prob
+  kind: numeric
+  difficulty: 3
+  statement: |
+    You plan a one-sample z-test (known sigma) for a shift of 0.5 sigma, two-sided at alpha = 0.05,
+    with power 0.80. Compute the required sample size n (give the unrounded value from the formula).
+    End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 31.4
+    rel_tol: 0.05
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Uses n = ((z_{1-alpha/2} + z_{power}) / effect)^2 with z = 1.96 and 0.84" }
+    - { points: 2, criterion: "States that one rounds up to 32 in practice and why" }
+  reference_solution: |
+    n = ((1.96 + 0.8416)/0.5)^2 = (5.603)^2 = 31.4, rounded up to 32 subjects.
+    ANSWER: 31.4
+  concepts: [hypothesis tests, p-values, and power]
+
+- id: p1.prob.005
+  module: p1.prob
+  kind: model
+  difficulty: 4
+  statement: |
+    A hospital finds that patients who receive a new drug have higher mortality than patients
+    who do not. Explain, with a concrete mechanism, how this could occur even if the drug reduces
+    mortality for every patient. Then design a study that would settle the question, stating what
+    it controls and one practical limitation.
+  answer:
+    type: rubric
+    rubric:
+      - { points: 3, criterion: "Names confounding by indication: sicker patients are more likely to receive the drug; gives a mechanism" }
+      - { points: 2, criterion: "Correctly describes the direction of the bias and why conditioning on observed covariates may not remove it" }
+      - { points: 3, criterion: "Proposes randomized assignment and explains that randomization balances unmeasured confounders in expectation" }
+      - { points: 2, criterion: "Gives a real limitation: ethics of withholding, generalizability, compliance, or power" }
+  reference_solution: |
+    Confounding by indication: physicians give the new drug to the sickest patients, so treatment is
+    correlated with baseline risk. Adjusting for recorded covariates does not fix it when severity is
+    measured imperfectly. A randomized controlled trial assigns the drug by lot, which makes treatment
+    independent of all baseline variables in expectation, so the mortality difference estimates the causal
+    effect. Limitations: withholding a possibly effective drug raises ethical issues, trial populations are
+    narrower than clinical ones, and non-compliance dilutes the estimate.
+  concepts: [confounding and randomization]
+
+- id: p1.prob.006
+  module: p1.prob
+  kind: numeric
+  difficulty: 3
+  statement: |
+    Let X_1, ..., X_12 be i.i.d. Uniform(0, 1). Use the central limit theorem to approximate
+    P(sum X_i > 7.5). End with "ANSWER: <number>".
+  answer:
+    type: numeric
+    value: 0.0668
+    rel_tol: 0.05
+  points: 4
+  method_rubric:
+    - { points: 2, criterion: "Computes mean 6 and variance 12 * (1/12) = 1 for the sum" }
+    - { points: 2, criterion: "Standardizes to P(Z > 1.5) and reads the normal tail correctly" }
+  reference_solution: |
+    E[sum] = 12 * 1/2 = 6, Var = 12 * 1/12 = 1. P(sum > 7.5) ~ P(Z > 1.5) = 0.0668.
+    ANSWER: 0.0668
+  concepts: [law of large numbers and central limit theorem]

@@ -1,0 +1,54 @@
+budget_usd: 300
+items:
+  - { item: Digital multimeter, approx_usd: 25, used_in: [p3.emdev, p3.signals, p3.physio] }
+  - { item: ESP32 or Arduino-class microcontroller with USB, approx_usd: 15, used_in: [p3.signals, p3.physio, p2.cm] }
+  - { item: Breadboard, jumper wires, resistor and capacitor assortment, approx_usd: 20, used_in: [p3.emdev, p3.signals] }
+  - { item: Op-amp assortment (e.g. TL072, LM358) and a few transistors, approx_usd: 10, used_in: [p3.emdev, p3.physio] }
+  - { item: Load cell with HX711 amplifier, approx_usd: 10, used_in: [p3.continuum, p3.physio] }
+  - { item: Thermistors or DS18B20 digital temperature sensors (x3), approx_usd: 10, used_in: [p2.sm, p3.heat, p3.signals] }
+  - { item: Power resistor or small heater pad (5-10 W), approx_usd: 8, used_in: [p3.signals, p3.heat] }
+  - { item: MPU-6050 inertial measurement unit, approx_usd: 6, used_in: [p2.cm, p3.signals] }
+  - { item: Photodiode or phototransistor and a laser pointer, approx_usd: 10, used_in: [p2.em, p2.cm] }
+  - { item: Syringes, silicone tubing in two diameters, graduated cylinder, approx_usd: 15, used_in: [p3.continuum] }
+  - { item: Digital calipers and a kitchen scale (0.1 g), approx_usd: 25, used_in: [p2.cm, p3.continuum, p3.heat] }
+  - { item: Spring set, string, steel balls, protractor, approx_usd: 15, used_in: [p2.cm] }
+  - { item: USB microscope (40-1000x), approx_usd: 30, used_in: [p3.cellbio] }
+  - { item: Baker's yeast, sugar, agar plates or petri dishes, pipettes, approx_usd: 25, used_in: [p3.cellbio] }
+  - { item: Insulated cup, thermos, ice, approx_usd: 10, used_in: [p2.sm, p3.heat] }
+  - { item: Electrode pads (ECG snap) and leads, approx_usd: 15, used_in: [p3.physio] }
+protocols:
+  - module: p2.cm
+    title: Period of a physical pendulum versus amplitude
+    measure: Time 20 swings at amplitudes from 10 to 80 degrees; use the IMU or a phototransistor gate for timing.
+    model: T(theta0) = 4 sqrt(L/g) K(sin(theta0/2)); fit g and compare to the small-angle formula.
+    report: Plot T against amplitude with error bars; show the small-angle formula failing above 30 degrees.
+  - module: p2.sm
+    title: Cooling curve and the heat transfer coefficient
+    measure: Log the temperature of hot water in an insulated cup every 10 s for an hour with a DS18B20.
+    model: Lumped capacitance; fit h from the exponential decay and compute the Biot number to justify it.
+    report: Residuals of the fit; where and why the single-exponential model fails.
+  - module: p3.emdev
+    title: RC time constant and filter response
+    measure: Step response of an RC circuit on the microcontroller ADC; then drive with a square wave at several frequencies.
+    model: V(t) = V0 (1 - exp(-t/RC)); |H| = 1/sqrt(1 + (omega RC)^2).
+    report: Fitted RC versus nominal component values with tolerances; Bode plot from measured amplitudes.
+  - module: p3.signals
+    title: Temperature control loop
+    measure: Heater pad plus thermistor; step the heater and record the open-loop response.
+    model: First-order plus dead time plant; design PI gains; predict the closed-loop step response.
+    report: Measured versus predicted closed-loop response; explain the discrepancy.
+  - module: p3.continuum
+    title: Poiseuille flow through tubing
+    measure: Gravity-driven flow from a syringe through tubing of two diameters; time to drain a known volume at several heads.
+    model: Q = pi R^4 dP / (8 mu L); compute Reynolds number for each run.
+    report: Q versus dP with the R^4 dependence tested across the two tubes; identify where the laminar assumption breaks.
+  - module: p3.cellbio
+    title: Yeast growth curve
+    measure: Optical density by phone camera through a cuvette, or cell counts under the USB microscope, every 30 min for 8 h.
+    model: Logistic growth; fit doubling time with propagated uncertainty from count statistics.
+    report: Doubling time with error; lag phase duration; compare with literature values for the sugar concentration used.
+  - module: p3.physio
+    title: Single-lead ECG
+    measure: Instrumentation amplifier from op-amps, electrode pads, microcontroller ADC at 500 Hz.
+    model: Expected signal 0.5 to 2 mV; noise floor from the Johnson and amplifier noise budget.
+    report: Measured heart rate; measured noise against the budget; identify the dominant noise source.

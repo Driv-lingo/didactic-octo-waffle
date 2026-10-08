@@ -1,0 +1,99 @@
+id: selection
+title: Selection week written exam
+duration_minutes: 120
+pass_mark: 0.7
+description: |
+  Sat before enrolment. It tests algebra, basic calculus, logic, programming, and the ability to read a
+  technical paragraph and find its claim. It is not a knowledge test; it is a learning-speed and honesty
+  test. The five observed days of the real schedule that follow it matter more than the score.
+problems:
+  - id: selection.001
+    module: selection
+    kind: symbolic
+    difficulty: 1
+    statement: |
+      Simplify (x^2 - 1)/(x - 1) for x != 1. End with "ANSWER: <expression in x>".
+    answer: { type: symbolic, expr: "x + 1", symbols: [x] }
+    points: 3
+    reference_solution: |
+      (x - 1)(x + 1)/(x - 1) = x + 1.
+      ANSWER: x + 1
+  - id: selection.002
+    module: selection
+    kind: symbolic
+    difficulty: 2
+    statement: |
+      Differentiate f(x) = x^2 sin(x). End with "ANSWER: <expression in x>".
+    answer: { type: symbolic, expr: "2*x*sin(x) + x**2*cos(x)", symbols: [x] }
+    points: 3
+    reference_solution: |
+      Product rule: 2x sin x + x^2 cos x.
+      ANSWER: 2*x*sin(x) + x**2*cos(x)
+  - id: selection.003
+    module: selection
+    kind: symbolic
+    difficulty: 2
+    statement: |
+      Evaluate the integral of x^2 from 0 to 2. End with "ANSWER: <value>".
+    answer: { type: symbolic, expr: "8/3", symbols: [] }
+    points: 3
+    reference_solution: |
+      [x^3/3]_0^2 = 8/3.
+      ANSWER: 8/3
+  - id: selection.004
+    module: selection
+    kind: short
+    difficulty: 2
+    statement: |
+      "All A are B. Some B are C." Does it follow that some A are C? Answer yes or no and give a
+      concrete counterexample or proof.
+    answer:
+      type: rubric
+      rubric:
+        - { points: 2, criterion: "Answers no" }
+        - { points: 3, criterion: "Gives a valid counterexample, e.g. A = cats, B = mammals, C = dogs" }
+    reference_solution: |
+      No. Cats are mammals; some mammals are dogs; no cat is a dog.
+  - id: selection.005
+    module: selection
+    kind: short
+    difficulty: 3
+    statement: |
+      Read: "We measured reaction time in 40 volunteers before and after one cup of coffee and found a
+      mean improvement of 12 ms (p = 0.03). We conclude caffeine improves reaction time." State the
+      claim in one sentence, then name the single most serious weakness in the evidence for it.
+    answer:
+      type: rubric
+      rubric:
+        - { points: 2, criterion: "States the claim: caffeine causally improves reaction time" }
+        - { points: 4, criterion: "Identifies a real weakness: no control group, so practice effects or time-of-day could explain the improvement (confounding); or no placebo so expectation could" }
+        - { points: 2, criterion: "Explains briefly why that weakness undermines the causal conclusion specifically" }
+    reference_solution: |
+      Claim: caffeine causes faster reaction times. Weakness: there is no control group, so the second
+      measurement benefits from practice at the task regardless of coffee; a placebo-controlled crossover
+      would separate caffeine from practice and expectation.
+  - id: selection.006
+    module: selection
+    kind: code
+    difficulty: 2
+    statement: |
+      Write `count_primes(n)` returning the number of primes strictly less than n.
+    answer:
+      type: code
+      entry_point: count_primes
+      tests:
+        - { call: "count_primes(10)", expected: "4" }
+        - { call: "count_primes(2)", expected: "0" }
+        - { call: "count_primes(100)", expected: "25" }
+        - { call: "count_primes(10000)", expected: "1229" }
+    points: 10
+    reference_solution: |
+      def count_primes(n):
+          if n < 3:
+              return 0
+          sieve = [True] * n
+          sieve[0] = sieve[1] = False
+          for i in range(2, int(n ** 0.5) + 1):
+              if sieve[i]:
+                  sieve[i*i::i] = [False] * len(sieve[i*i::i])
+          return sum(sieve)
