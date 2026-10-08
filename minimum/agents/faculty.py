@@ -18,6 +18,7 @@ from .schemas import (
     ExaminerTurn,
     GraderVerdict,
     LectureReview,
+    LessonOut,
     PacingPlan,
     TutorReply,
     VerifierVerdict,
@@ -148,6 +149,29 @@ class AdvisorView(BaseModel):
         )
 
 
+class LecturerView(BaseModel):
+    module_title: str
+    module_summary: str
+    field: str
+    concept: str
+    all_concepts: list[str]
+    outcomes: list[str]
+    texts: list[str]
+    prerequisites: list[str]
+
+    def render(self) -> str:
+        return "\n\n".join(
+            [
+                f"MODULE: {self.module_title} ({self.field})\n{self.module_summary}",
+                f"CONCEPT TO TEACH: {self.concept}",
+                "THE MODULE'S CONCEPTS, IN ORDER (teach only the one above; assume earlier ones):\n" + _bullets(self.all_concepts),
+                "MODULE OUTCOMES:\n" + _bullets(self.outcomes),
+                "TEXTS (the first is primary):\n" + _bullets(self.texts),
+                "PREREQUISITE MODULES ALREADY COMPLETED:\n" + _bullets(self.prerequisites),
+            ]
+        )
+
+
 class CriticView(BaseModel):
     module_title: str
     outcomes: list[str]
@@ -236,3 +260,16 @@ class Critic(Agent):
 
     def review(self, view: CriticView) -> LectureReview:
         return self.ask([self.user(view.render())], LectureReview)
+
+
+class Lecturer(Agent):
+    role = "lecturer"
+    system = prompts.LECTURER
+    effort = "high"
+
+    def write(self, view: LecturerView, fix: str | None = None) -> LessonOut:
+        msgs = [self.user(view.render() + "\n\nWrite the lesson.")]
+        if fix:
+            msgs.append(self.assistant("(previous draft)"))
+            msgs.append(self.user("A verifier found these problems in the previous draft. Rewrite the whole lesson, fixing them:\n" + fix))
+        return self.ask(msgs, LessonOut)

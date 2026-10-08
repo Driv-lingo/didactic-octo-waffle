@@ -1,0 +1,91 @@
+# Curated open material per module: video lectures, open texts, and one "stretch" item to read
+# above level. Links are to course home pages, which are stable; pick the lecture that matches
+# the lesson's concept. Run `minimum links` to check that every URL still resolves.
+p1.analysis:
+  - { kind: video, title: "MIT 18.100A Real Analysis (Rodriguez, Fall 2020), full lecture videos", url: "https://ocw.mit.edu/courses/18-100a-real-analysis-fall-2020/", placement: "Lectures 1-9 for sequences, limits, and completeness; 10-18 for continuity, differentiation, and the Riemann integral; 19-24 for sequences of functions." }
+  - { kind: text, title: "Basic Analysis I (Lebl), free PDF", url: "https://www.jirka.org/ra/", placement: "Chapters 1-7 track the module in order." }
+  - { kind: stretch, title: "Tao, Analysis I, chapter on the construction of the reals", url: "https://terrytao.wordpress.com/books/analysis-i/", note: "Read the Dedekind cut or Cauchy-sequence construction and explain why completeness is a theorem there, not an axiom." }
+p1.linalg:
+  - { kind: video, title: "MIT 18.06 Linear Algebra (Strang), full lecture videos", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/", placement: "Lectures 1-10 for spaces and bases; 15-17 for projections; 21-22 for eigenvalues; 25 for symmetric matrices; 29 for the SVD." }
+  - { kind: video, title: "3Blue1Brown, Essence of Linear Algebra", url: "https://www.3blue1brown.com/topics/linear-algebra", placement: "Watch once before the module for geometric intuition; do not mistake it for the content." }
+  - { kind: text, title: "Linear Algebra Done Right, 4th edition (Axler), free", url: "https://linear.axler.net/", placement: "Chapters 1-3, 5-7 are the module; chapter 7 is the spectral theorem." }
+  - { kind: video, title: "MIT 18.065 Matrix Methods (Strang), for the numerical half", url: "https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/", placement: "Lectures 1-8 for the SVD and conditioning in practice." }
+  - { kind: stretch, title: "Trefethen and Bau, Lecture 12, Conditioning and condition numbers", url: "https://people.maths.ox.ac.uk/trefethen/text.html", note: "Why a backward-stable algorithm can still give a wrong answer on an ill-conditioned problem." }
+p1.ode:
+  - { kind: video, title: "Strogatz, Nonlinear Dynamics and Chaos, Cornell lecture series", url: "https://www.youtube.com/playlist?list=PLbN57C5Zdl6j_qJA-pARJnKsmROzPnO9V", placement: "Lectures 1-12 cover fixed points, bifurcations, and phase-plane analysis in the book's order." }
+  - { kind: video, title: "MIT 18.03 Differential Equations (Mattuck), lecture videos", url: "https://ocw.mit.edu/courses/18-03-differential-equations-spring-2010/", placement: "Lectures 24-33 for linear systems, the matrix exponential, and phase portraits." }
+  - { kind: text, title: "Notes on Diffy Qs (Lebl), free", url: "https://www.jirka.org/diffyqs/", placement: "Chapter 3 for systems, chapter 8 for nonlinear systems." }
+  - { kind: stretch, title: "Hirsch, Smale, Devaney, chapter on the Hartman-Grobman theorem", url: "https://www.sciencedirect.com/book/9780123820105/differential-equations-dynamical-systems-and-an-introduction-to-chaos", note: "Read the statement and the sketch of proof; say precisely what fails at a nonhyperbolic fixed point." }
+p1.pde:
+  - { kind: video, title: "MIT 18.303 Linear Partial Differential Equations", url: "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-fall-2006/", placement: "Separation of variables, Sturm-Liouville theory, and Green's functions." }
+  - { kind: video, title: "3Blue1Brown, the heat equation and Fourier series (two videos)", url: "https://www.3blue1brown.com/topics/differential-equations", placement: "Before the Fourier section, for the picture of why sine modes decay independently." }
+  - { kind: stretch, title: "Evans, Partial Differential Equations, section 2.3 (heat equation fundamental solution)", url: "https://bookstore.ams.org/gsm-19-r", note: "Read the derivation of the heat kernel by scaling; reproduce the uniqueness argument for bounded solutions." }
+p1.prob:
+  - { kind: video, title: "Harvard Stat 110, Probability (Blitzstein), full lectures", url: "https://projects.iq.harvard.edu/stat110/youtube", placement: "Lectures 1-34 in order; conditioning (lectures 4-6) and the limit theorems (29-30) are the core." }
+  - { kind: video, title: "MIT 18.650 Statistics for Applications (Rigollet)", url: "https://ocw.mit.edu/courses/18-650-statistics-for-applications-fall-2016/", placement: "Lectures 1-6 for estimation and testing at the level this module expects." }
+  - { kind: text, title: "Introduction to Probability (Blitzstein and Hwang), free PDF", url: "https://projects.iq.harvard.edu/stat110/home", placement: "The book for the Stat 110 lectures." }
+  - { kind: stretch, title: "Pearl, Causality, chapter 3 (the back-door criterion)", url: "http://bayes.cs.ucla.edu/BOOK-2K/", note: "After the confounding problem: say in one paragraph when adjustment removes confounding and when it cannot." }
+p1.complex:
+  - { kind: video, title: "MIT 18.04 Complex Variables with Applications (Orloff)", url: "https://ocw.mit.edu/courses/18-04-complex-variables-with-applications-spring-2018/", placement: "Topics 1-9; residues and the evaluation of real integrals are topics 8-9." }
+  - { kind: text, title: "Needham, Visual Complex Analysis, chapters 1-2 and 8-9", url: "https://usf.usfca.edu/vca/", placement: "For the geometric meaning of analyticity and of Cauchy's theorem." }
+  - { kind: stretch, title: "Bender and Orszag, chapter 6 (asymptotic expansion of integrals)", url: "https://link.springer.com/book/10.1007/978-1-4757-3069-2", note: "Read Laplace's method and steepest descent; apply one of them to Stirling's formula." }
+p1.compute:
+  - { kind: video, title: "MIT 6.0001 Introduction to Computer Science and Programming in Python", url: "https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/", placement: "Weeks 1-3 only if Python is new; otherwise skip." }
+  - { kind: video, title: "MIT 6.001 Structure and Interpretation of Computer Programs (Abelson and Sussman, 1986 lectures)", url: "https://ocw.mit.edu/courses/6-001-structure-and-interpretation-of-computer-programs-spring-2005/", placement: "Lectures 1A-3B: procedures, recursion, and data abstraction." }
+  - { kind: video, title: "MIT 18.330 Introduction to Numerical Analysis", url: "https://ocw.mit.edu/courses/18-330-introduction-to-numerical-analysis-spring-2012/", placement: "Floating point, root finding, interpolation, quadrature, in the module's order." }
+  - { kind: text, title: "What Every Computer Scientist Should Know About Floating-Point Arithmetic (Goldberg)", url: "https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html", placement: "Read before the floating-point concept; it is the primary source." }
+  - { kind: stretch, title: "Higham, Accuracy and Stability of Numerical Algorithms, chapter 1", url: "https://epubs.siam.org/doi/book/10.1137/1.9780898718027", note: "Backward error versus forward error; restate the chapter's main example in your own words." }
+p2.cm:
+  - { kind: video, title: "Susskind, The Theoretical Minimum: Classical Mechanics (Stanford)", url: "https://theoreticalminimum.com/courses/classical-mechanics/2011/fall", placement: "All ten lectures; the Lagrangian and Hamiltonian formulations with the symmetries made explicit." }
+  - { kind: video, title: "MIT 8.223 Classical Mechanics II (Hamiltonian and Lagrangian mechanics)", url: "https://ocw.mit.edu/courses/8-223-classical-mechanics-ii-january-iap-2017/", placement: "Lectures on normal modes and canonical transformations." }
+  - { kind: stretch, title: "Arnold, Mathematical Methods of Classical Mechanics, chapter 3 (variational principles)", url: "https://link.springer.com/book/10.1007/978-1-4757-2063-1", note: "Read the derivation of the Euler-Lagrange equations from the action; state where the boundary terms go." }
+p2.em:
+  - { kind: video, title: "MIT 8.02 Physics II: Electricity and Magnetism (undergraduate bridge)", url: "https://ocw.mit.edu/courses/8-02-physics-ii-electricity-and-magnetism-spring-2019/", placement: "Only if the undergraduate material is missing; the module runs at Jackson level." }
+  - { kind: video, title: "MIT 8.07 Electromagnetism II (Guth)", url: "https://ocw.mit.edu/courses/8-07-electromagnetism-ii-fall-2012/", placement: "Lecture notes and problem sets at the level of this module; boundary value problems, multipoles, radiation, relativity." }
+  - { kind: stretch, title: "Jackson, chapter 14 (radiation by moving charges), through the Larmor formula", url: "https://www.wiley.com/en-us/Classical+Electrodynamics%2C+3rd+Edition-p-9780471309321", note: "Derive the Larmor formula from the Lienard-Wiechert fields in the nonrelativistic limit." }
+p2.qm:
+  - { kind: video, title: "MIT 8.04 Quantum Physics I (Zwiebach)", url: "https://ocw.mit.edu/courses/8-04-quantum-physics-i-spring-2016/", placement: "Lectures 1-24: the postulates, the harmonic oscillator, and the hydrogen atom." }
+  - { kind: video, title: "MIT 8.05 Quantum Physics II (Zwiebach)", url: "https://ocw.mit.edu/courses/8-05-quantum-physics-ii-fall-2013/", placement: "Angular momentum, addition of angular momenta, and perturbation theory." }
+  - { kind: video, title: "MIT 8.06 Quantum Physics III", url: "https://ocw.mit.edu/courses/8-06-quantum-physics-iii-spring-2018/", placement: "Identical particles and scattering." }
+  - { kind: stretch, title: "Sakurai, section on the Born approximation and its validity", url: "https://www.cambridge.org/highereducation/books/modern-quantum-mechanics/DF43277E8AEDF83CC12EA62887C277DC", note: "State the condition for the Born approximation to hold and check it for a Yukawa potential." }
+p2.sm:
+  - { kind: video, title: "MIT 8.333 Statistical Mechanics I (Kardar)", url: "https://ocw.mit.edu/courses/8-333-statistical-mechanics-i-statistical-mechanics-of-particles-fall-2013/", placement: "The full course; the module follows Kardar's book." }
+  - { kind: video, title: "Susskind, Statistical Mechanics (Stanford)", url: "https://theoreticalminimum.com/courses/statistical-mechanics/2013/spring", placement: "Ten lectures; a gentler route into ensembles and the partition function." }
+  - { kind: stretch, title: "Kardar, Statistical Physics of Fields, chapter 1 (the Landau-Ginzburg approach)", url: "https://www.cambridge.org/core/books/statistical-physics-of-fields/", note: "What mean-field theory assumes, and where the Ginzburg criterion says it fails." }
+p2.pchem:
+  - { kind: video, title: "MIT 5.61 Physical Chemistry (quantum chemistry)", url: "https://ocw.mit.edu/courses/5-61-physical-chemistry-fall-2017/", placement: "Lectures on the Born-Oppenheimer approximation, LCAO, and molecular orbitals." }
+  - { kind: video, title: "MIT 5.62 Physical Chemistry II (statistical thermodynamics and kinetics)", url: "https://ocw.mit.edu/courses/5-62-physical-chemistry-ii-spring-2008/", placement: "Equilibrium constants from partition functions; transition state theory." }
+  - { kind: stretch, title: "Szabo and Ostlund, Modern Quantum Chemistry, chapter 3 (Hartree-Fock)", url: "https://store.doverpublications.com/products/9780486691862", note: "Follow the derivation of the Roothaan equations; say what the self-consistent field iteration converges to and why it may not." }
+p2.algo:
+  - { kind: video, title: "MIT 6.006 Introduction to Algorithms (2020)", url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/", placement: "The full course: data structures, sorting, graphs, dynamic programming." }
+  - { kind: video, title: "MIT 6.046J Design and Analysis of Algorithms", url: "https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/", placement: "Divide and conquer, randomized algorithms, amortization, NP-completeness." }
+  - { kind: stretch, title: "Arora and Barak, Computational Complexity, chapter 2 (NP and NP-completeness)", url: "https://theory.cs.princeton.edu/complexity/", note: "Read the Cook-Levin theorem; explain in one paragraph why a reduction must be polynomial time." }
+p2.sys:
+  - { kind: video, title: "CMU 15-213 Introduction to Computer Systems (the course behind CS:APP)", url: "https://www.cs.cmu.edu/~213/", placement: "Lecture videos and labs; the memory hierarchy and concurrency lectures are the module." }
+  - { kind: text, title: "Operating Systems: Three Easy Pieces, free", url: "https://pages.cs.wisc.edu/~remzi/OSTEP/", placement: "Virtualization and concurrency parts." }
+  - { kind: stretch, title: "Drepper, What Every Programmer Should Know About Memory", url: "https://people.freebsd.org/~lstewart/articles/cpumemory.pdf", note: "Sections 3 and 6; explain cache-line false sharing from the coherence protocol." }
+p3.signals:
+  - { kind: video, title: "MIT 6.003 Signals and Systems (Freeman)", url: "https://ocw.mit.edu/courses/6-003-signals-and-systems-fall-2011/", placement: "The full course; transforms, sampling, and filters." }
+  - { kind: video, title: "Brian Douglas, Control Systems Lectures", url: "https://www.youtube.com/user/ControlLectures", placement: "Bode, Nyquist, root locus, and PID, with the intuition the texts leave out." }
+  - { kind: text, title: "Feedback Systems (Astrom and Murray), free", url: "https://fbswiki.org/", placement: "Chapters 1-11." }
+  - { kind: stretch, title: "Doyle, Francis, Tannenbaum, Feedback Control Theory, chapter 6 (performance limitations)", url: "https://sites.google.com/site/brucefrancis/home/dft", note: "Bode's sensitivity integral: state it and explain what it forbids." }
+p3.emdev:
+  - { kind: video, title: "MIT 6.002 Circuits and Electronics (Agarwal)", url: "https://ocw.mit.edu/courses/6-002-circuits-and-electronics-spring-2007/", placement: "The lumped abstraction, impedance, amplifiers, and the digital abstraction." }
+  - { kind: video, title: "MIT 6.012 Microelectronic Devices and Circuits", url: "https://ocw.mit.edu/courses/6-012-microelectronic-devices-and-circuits-fall-2009/", placement: "p-n junctions and MOSFETs from device physics." }
+  - { kind: stretch, title: "Pozar, Microwave Engineering, chapter 2 (transmission line theory)", url: "https://www.wiley.com/en-us/Microwave+Engineering%2C+4th+Edition-p-9780470631553", note: "Derive the telegrapher's equations from a lumped model and state when the lumped abstraction fails." }
+p3.continuum:
+  - { kind: video, title: "MIT 2.25 Advanced Fluid Mechanics", url: "https://ocw.mit.edu/courses/2-25-advanced-fluid-mechanics-fall-2013/", placement: "Kinematics, the Navier-Stokes equations, dimensional analysis, and viscous flows." }
+  - { kind: video, title: "NCFMF fluid mechanics films (Shapiro and others)", url: "http://web.mit.edu/hml/ncfmf.html", placement: "Watch Flow Visualization and Boundary Layer Control before the boundary-layer concept." }
+  - { kind: stretch, title: "Batchelor, An Introduction to Fluid Dynamics, section 4.6 (flow at large Reynolds number)", url: "https://www.cambridge.org/core/books/an-introduction-to-fluid-dynamics/", note: "Why the inviscid limit is singular; relate it to the boundary-layer scaling." }
+p3.heat:
+  - { kind: video, title: "MIT 2.51 Intermediate Heat and Mass Transfer", url: "https://ocw.mit.edu/courses/2-51-intermediate-heat-and-mass-transfer-fall-2008/", placement: "Conduction, convection correlations, radiation exchange, and diffusion." }
+  - { kind: stretch, title: "Bird, Stewart, Lightfoot, Transport Phenomena, chapter 11 (energy equation)", url: "https://www.wiley.com/en-us/Transport+Phenomena%2C+Revised+2nd+Edition-p-9780470115398", note: "Derive the energy equation and reduce it to the heat equation, stating every assumption." }
+p3.cellbio:
+  - { kind: video, title: "MIT 7.016 Introductory Biology", url: "https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/", placement: "The central dogma, gene regulation, and metabolism, as the biology bridge." }
+  - { kind: video, title: "iBiology lectures, Cell Biology and Biophysics series", url: "https://www.ibiology.org/", placement: "Short research-level talks; pick the ones on molecular motors and gene regulation." }
+  - { kind: text, title: "Cell Biology by the Numbers (Milo and Phillips), free", url: "http://book.bionumbers.org/", placement: "The source for every estimate in this module; read it alongside the lessons." }
+  - { kind: stretch, title: "Bialek, Biophysics: Searching for Principles, chapter 4 (noise in gene expression)", url: "https://press.princeton.edu/books/hardcover/9780691138916/biophysics", note: "Where the Poisson limit on gene expression noise comes from and when it is beaten." }
+p3.physio:
+  - { kind: video, title: "MIT HST.542J Quantitative Physiology: Organ Transport Systems", url: "https://ocw.mit.edu/courses/hst-542j-quantitative-physiology-organ-transport-systems-spring-2004/", placement: "The cardiovascular and respiratory systems as transport and control problems." }
+  - { kind: video, title: "MIT 9.40 Introduction to Neural Computation", url: "https://ocw.mit.edu/courses/9-40-introduction-to-neural-computation-spring-2018/", placement: "Lectures 1-5 for the Hodgkin-Huxley model." }
+  - { kind: stretch, title: "Hodgkin and Huxley (1952), A quantitative description of membrane current", url: "https://doi.org/10.1113/jphysiol.1952.sp004764", note: "Read the original paper; identify the one assumption you would test first today." }

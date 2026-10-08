@@ -27,16 +27,29 @@
   .banner { background:#fff3cd; color:#5b4600; padding:.5rem 1rem; font-family: system-ui, sans-serif; font-size:.9rem; }
   .row { display:flex; gap:1rem; flex-wrap:wrap; }
   .pill { display:inline-block; padding:.05rem .5rem; border:1px solid var(--line); border-radius:999px; font-size:.8rem; font-family: system-ui, sans-serif; }
+  .step { display:flex; gap:.75rem; align-items:flex-start; padding:.6rem 0; border-bottom:1px solid var(--line); }
+  .step .n { width:1.6rem; height:1.6rem; border-radius:50%; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:system-ui,sans-serif; font-size:.8rem; flex:none; }
+  .step.done .n { background:var(--good); color:#fff; border-color:var(--good); }
+  .step.current { background:var(--card); margin:0 -1rem; padding:.75rem 1rem; border:1px solid var(--accent); border-radius:8px; }
+  .step .t { flex:1; } .step .m { color:var(--mute); font-family:system-ui,sans-serif; font-size:.85rem; white-space:nowrap; }
+  .bar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin:.5rem 0 1rem; } .bar div { height:100%; background:var(--accent); }
+  .lesson h2 { margin-top:1.5rem; } .lesson pre { white-space:pre-wrap; }
+  .katex-display { overflow-x:auto; }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.11/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false});"></script>
 </head>
 <body>
 <nav>
   <a class="brand" href="/">{{ course.title }}</a>
+  <a href="/">Today</a>
+  <a href="/progress">Progress</a>
   <a href="/curriculum">Curriculum</a>
   <a href="/review">Review</a>
-  <a href="/plan">Plan</a>
-  <a href="/lecture">Lecture</a>
-  <a href="/advisor">Advisor</a>
+  <a href="/lecture">Teach back</a>
+  {% if phase_id == 'p4' %}<a href="/advisor">Advisor</a>{% endif %}
   <a href="/kit">Lab kit</a>
   <span class="mute" style="margin-left:auto">{{ learner }}</span>
 </nav>

@@ -97,6 +97,24 @@ faculty that does not teach and grades only what the deterministic checkers can 
 Offline mode exists so gates, retrieval, exam drawing, and grading plumbing can be
 exercised without a model; it says so in every reply.
 
+## How a day works
+
+The home screen is Today: an ordered list built from the learner's state, with one current step.
+Retrieval first, always. Then the next lesson in the current module, the textbook section that
+lesson names, the next problem, the module's experiment, a stretch reading, and once a week the
+teach-back lecture. Each step opens the right page; "Done, next" moves on. The day is stored, so
+it survives a restart and resets at midnight UTC.
+
+Lessons are written by the faculty's lecturer the first time a concept is opened (or in the
+background when a module is started), checked by the verifier, and stored so they are generated
+once. A lesson names the exact section of the primary text, derives the main result, gives two
+worked examples, the common mistake, and a check question the tutor judges before the learner
+moves on. Lessons that fail verification are shown with a warning rather than hidden.
+
+Each module also carries curated open material in `materials.yaml`: lecture videos (mostly MIT
+OpenCourseWare, Stanford's Theoretical Minimum, Stat 110), free texts, and one stretch reading.
+`minimum links` checks every URL still resolves.
+
 ## The rules the orchestrator enforces
 
 Prompts shape behavior. These three rules are enforced in code because a prompt cannot
@@ -126,6 +144,7 @@ be trusted to enforce them.
 | Pacer | the entire learner model | today's plan and the drift warning |
 | Advisor | anchors, time remaining, project notes | scope and critique of the research project |
 | Critic | module outcomes and the learner's lecture | correctness and clarity scores |
+| Lecturer | module, concept, texts, prerequisites | the lesson for one concept, verified before storage |
 
 ## Content
 

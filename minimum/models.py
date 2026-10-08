@@ -122,6 +122,14 @@ class Text(BaseModel):
     url: str | None = None
 
 
+class Material(BaseModel):
+    kind: str  # video | text | stretch | tool
+    title: str
+    url: str
+    note: str = ""
+    placement: str = ""  # which concept(s) it supports, in words
+
+
 class Module(BaseModel):
     id: str
     title: str
@@ -131,6 +139,7 @@ class Module(BaseModel):
     summary: str
     outcomes: list[str]
     texts: list[Text] = Field(default_factory=list)
+    materials: list[Material] = Field(default_factory=list)
     concepts: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
     project: str | None = None

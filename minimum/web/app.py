@@ -5,14 +5,16 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
+import markdown as _markdown
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from ..content import load_course
+from ..day import current_module, load_or_build_day, mark_done, next_concept
 from ..gates import GateError, can_attempt
 from ..llm import default_client
-from ..orchestrator import Orchestrator, OralSession, SolutionLocked
+from ..orchestrator import Orchestrator, SolutionLocked
 from ..persist import BlobSync, blob_sync_from_env
 from ..store import Store
 
@@ -81,12 +83,12 @@ def create_app(
     if token:
         app.add_middleware(TokenAuth, token=token)
     templates = Jinja2Templates(directory=str(HERE / "templates"))
-    chats: dict[str, list[dict]] = {}
-    orals: dict[str, OralSession] = {}
+    templates.env.filters["md"] = lambda text: _markdown.markdown(text or "", extensions=["fenced_code", "tables"])
 
     def render(request: Request, name: str, **ctx):
-        enrolled = orch.store.learner(learner) is not None
-        base = {"request": request, "course": bundle.course, "learner": learner, "enrolled": enrolled, "offline": offline}
+        rec = orch.store.learner(learner)
+        base = {"request": request, "course": bundle.course, "learner": learner, "enrolled": rec is not None,
+                "offline": offline, "phase_id": rec["current_phase"] if rec else None}
         base.update(ctx)
         return templates.TemplateResponse(request, name, base)
 
@@ -110,6 +112,64 @@ def create_app(
         return {"ok": bool(result.get("answer_correct")), **result}
 
     @app.get("/", response_class=HTMLResponse)
+    def today(request: Request):
+        if orch.store.learner(learner) is None:
+            return render(request, "enroll.html")
+        steps, done = load_or_build_day(bundle, orch.store, learner)
+        current = next((st for st in steps if st.id not in done), None)
+        mid = current_module(bundle, orch.store, learner)
+        mod = bundle.course.module(mid) if mid else None
+        total = sum(st.minutes for st in steps)
+        left = sum(st.minutes for st in steps if st.id not in done)
+        return render(request, "today.html", steps=steps, done=done, current=current, mod=mod, total=total, left=left)
+
+    @app.post("/today/done/{step_id:path}")
+    def today_done(step_id: str):
+        mark_done(orch.store, learner, step_id)
+        return RedirectResponse("/", status_code=303)
+
+    @app.post("/today/module")
+    def today_module(module_id: str = Form(...)):
+        bundle.course.module(module_id)
+        orch.store.set_current_module(learner, module_id)
+        if not any(c["module"] == module_id for c in orch.store.cards(learner)):
+            orch.start_module(learner, module_id)
+            if not offline:
+                orch.pregenerate_lessons(module_id)
+        return RedirectResponse("/", status_code=303)
+
+    # --- lessons ----------------------------------------------------------
+    @app.get("/lesson/{module_id}/{index}", response_class=HTMLResponse)
+    def lesson(request: Request, module_id: str, index: int, regenerate: int = 0):
+        mod = bundle.course.module(module_id)
+        if not 0 <= index < len(mod.concepts):
+            return render(request, "message.html", title="No such lesson", text="")
+        concept = mod.concepts[index]
+        les = orch.get_lesson(module_id, concept, regenerate=bool(regenerate))
+        studied = any(e["payload"].get("concept") == concept and e["payload"].get("module") == module_id for e in orch.store.events(learner, "lesson_done", limit=1000))
+        feedback = orch.store.chat(learner, f"lesson:{module_id}:{index}")
+        primary = mod.texts[0] if mod.texts else None
+        return render(request, "lesson.html", m=mod, index=index, concept=concept, lesson=les, body=les["body"], studied=studied,
+                      feedback=feedback, primary=primary, prev=index - 1 if index > 0 else None, nxt=index + 1 if index + 1 < len(mod.concepts) else None)
+
+    @app.post("/lesson/{module_id}/{index}/check")
+    def lesson_check(module_id: str, index: int, answer: str = Form(...)):
+        mod = bundle.course.module(module_id)
+        concept = mod.concepts[index]
+        reply = orch.check_lesson_answer(learner, module_id, concept, answer)
+        key = f"lesson:{module_id}:{index}"
+        orch.store.add_chat(learner, key, "user", answer)
+        orch.store.add_chat(learner, key, "assistant", reply.reply)
+        return RedirectResponse(f"/lesson/{module_id}/{index}#check", status_code=303)
+
+    @app.post("/lesson/{module_id}/{index}/done")
+    def lesson_done(module_id: str, index: int):
+        mod = bundle.course.module(module_id)
+        orch.mark_lesson_done(learner, module_id, mod.concepts[index])
+        mark_done(orch.store, learner, f"lesson:{index}")
+        return RedirectResponse("/", status_code=303)
+
+    @app.get("/progress", response_class=HTMLResponse)
     def dashboard(request: Request):
         if orch.store.learner(learner) is None:
             return render(request, "enroll.html")
@@ -142,11 +202,15 @@ def create_app(
         probs = bundle.problems_for(module_id)
         done = {p.id for p in probs if orch.store.has_submitted(learner, p.id)}
         started = any(c["module"] == module_id for c in orch.store.cards(learner))
-        return render(request, "module.html", m=m, probs=probs, done=done, started=started)
+        studied = {e["payload"].get("concept") for e in orch.store.events(learner, "lesson_done", limit=1000) if e["payload"].get("module") == module_id}
+        have = orch.store.lessons_for(module_id)
+        return render(request, "module.html", m=m, probs=probs, done=done, started=started, studied=studied, have=have)
 
     @app.post("/module/{module_id}/start")
     def module_start(module_id: str):
         orch.start_module(learner, module_id)
+        if not offline:
+            orch.pregenerate_lessons(module_id)
         return RedirectResponse(f"/module/{module_id}", status_code=303)
 
     # --- problems --------------------------------------------------------
@@ -169,16 +233,17 @@ def create_app(
     # --- tutor -----------------------------------------------------------
     @app.get("/tutor/{module_id}", response_class=HTMLResponse)
     def tutor(request: Request, module_id: str, problem: str | None = None):
-        key = f"{module_id}:{problem or ''}"
-        return render(request, "tutor.html", m=bundle.course.module(module_id), problem=problem, history=chats.get(key, []))
+        key = f"tutor:{module_id}:{problem or ''}"
+        return render(request, "tutor.html", m=bundle.course.module(module_id), problem=problem, history=orch.store.chat(learner, key))
 
     @app.post("/tutor/{module_id}")
     def tutor_post(module_id: str, message: str = Form(...), problem: str = Form("")):
-        key = f"{module_id}:{problem}"
-        hist = chats.setdefault(key, [])
-        reply, ok = orch.tutor_turn(learner, module_id, [{"role": h["role"], "content": h["content"]} for h in hist], message, problem or None)
-        hist.append({"role": "user", "content": message})
-        hist.append({"role": "assistant", "content": reply.reply + ("" if ok else "  [unverified]")})
+        orch.chat_turn(learner, f"tutor:{module_id}:{problem}", module_id, message, problem or None)
+        return RedirectResponse(f"/tutor/{module_id}" + (f"?problem={problem}" if problem else ""), status_code=303)
+
+    @app.post("/tutor/{module_id}/clear")
+    def tutor_clear(module_id: str, problem: str = Form("")):
+        orch.store.clear_chat(learner, f"tutor:{module_id}:{problem}")
         return RedirectResponse(f"/tutor/{module_id}" + (f"?problem={problem}" if problem else ""), status_code=303)
 
     # --- written exams -----------------------------------------------------
@@ -218,24 +283,21 @@ def create_app(
     # --- oral exams --------------------------------------------------------
     @app.get("/oral/{exam_id}", response_class=HTMLResponse)
     def oral(request: Request, exam_id: str):
-        sess = orals.get(exam_id)
-        if sess is None or sess.done:
+        sess = orch.resume_oral(learner, exam_id)
+        if sess is None:
             try:
                 sess = orch.start_oral(learner, exam_id)
             except GateError as exc:
                 return render(request, "message.html", title="Cannot start oral", text=str(exc))
-            orals[exam_id] = sess
         return render(request, "oral.html", sess=sess, spec=bundle.course.exam(exam_id))
 
     @app.post("/oral/{exam_id}")
     def oral_post(request: Request, exam_id: str, answer: str = Form(...)):
-        sess = orals.get(exam_id)
-        if sess is None or sess.done:
+        sess = orch.resume_oral(learner, exam_id)
+        if sess is None:
             return RedirectResponse(f"/oral/{exam_id}", status_code=303)
-        orch.oral_answer(sess, answer)
-        if sess.done:
-            turn = sess.last
-            del orals[exam_id]
+        turn = orch.oral_answer(sess, answer)
+        if turn.done:
             return render(request, "oral_done.html", turn=turn, spec=bundle.course.exam(exam_id))
         return RedirectResponse(f"/oral/{exam_id}", status_code=303)
 
@@ -270,15 +332,11 @@ def create_app(
 
     @app.get("/advisor", response_class=HTMLResponse)
     def advisor(request: Request):
-        return render(request, "advisor.html", history=chats.get("advisor", []))
+        return render(request, "advisor.html", history=orch.store.chat(learner, "advisor"))
 
     @app.post("/advisor")
     def advisor_post(message: str = Form(...)):
-        hist = chats.setdefault("advisor", [])
-        r = orch.advise(learner, [{"role": h["role"], "content": h["content"]} for h in hist], message)
-        hist.append({"role": "user", "content": message})
-        extra = "".join(f"\n- critique: {x}" for x in r.critique) + "".join(f"\n- next: {x}" for x in r.next_actions)
-        hist.append({"role": "assistant", "content": r.reply + extra})
+        orch.chat_turn(learner, "advisor", None, message)
         return RedirectResponse("/advisor", status_code=303)
 
     @app.post("/anchors")

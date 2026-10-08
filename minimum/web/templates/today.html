@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block content %}
+<h1>Today</h1>
+{% if mod %}<p class="mute">Working through <a href="/module/{{ mod.id }}">{{ mod.title }}</a>. {{ left }} of about {{ total }} minutes left.</p>{% endif %}
+<div class="bar"><div style="width:{{ (100 * (total - left) / total) if total else 0 }}%"></div></div>
+{% if current %}
+<div class="step current">
+  <div class="n">{{ loop_index if false else (steps.index(current) + 1) }}</div>
+  <div class="t"><strong>{{ current.title }}</strong><br>{{ current.detail }}
+    <p style="margin:.6rem 0 0"><a href="{{ current.url }}"><button type="button">Open</button></a>
+    <form method="post" action="/today/done/{{ current.id }}" style="display:inline"><button class="secondary">Done, next</button></form></p></div>
+  <div class="m">{{ current.minutes }} min</div>
+</div>
+{% else %}
+<div class="card"><strong>Day complete.</strong> Everything on today's list is done. Rest, or open the module and go further.</div>
+{% endif %}
+<h3>The whole day</h3>
+{% for st in steps %}
+<div class="step {% if st.id in done %}done{% endif %}">
+  <div class="n">{% if st.id in done %}✓{% else %}{{ loop.index }}{% endif %}</div>
+  <div class="t"><a href="{{ st.url }}">{{ st.title }}</a>{% if st.id not in done and st != current %}<form method="post" action="/today/done/{{ st.id }}" style="display:inline"> <button class="secondary" style="padding:.1rem .5rem;font-size:.8rem">done</button></form>{% endif %}<br><span class="mute">{{ st.detail }}</span></div>
+  <div class="m">{{ st.minutes }} min</div>
+</div>
+{% endfor %}
+<details style="margin-top:1.5rem"><summary class="mute">Change the module I am working on</summary>
+<form method="post" action="/today/module" style="margin-top:.5rem"><select name="module_id">{% for ph in course.phases %}{% for m in ph.modules %}<option value="{{ m.id }}" {% if mod and m.id == mod.id %}selected{% endif %}>{{ m.id }} · {{ m.title }}</option>{% endfor %}{% endfor %}</select> <button class="secondary">Switch</button></form></details>
+{% endblock %}

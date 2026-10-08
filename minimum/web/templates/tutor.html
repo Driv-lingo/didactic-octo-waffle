@@ -1,10 +1,11 @@
 {% extends "base.html" %}{% block content %}
 <h1>Tutor · {{ m.title }}</h1>
 {% if problem %}<p class="mute">Discussing <a href="/problem/{{ problem }}">{{ problem }}</a>. The tutor will not solve it for you.</p>{% endif %}
+{% if not history %}<div class="card mute">The tutor teaches by asking. It will not solve an assigned problem for you, but it will explain any concept, derive any general result, or work a different example. State what you think is true and it will tell you if you are wrong. The conversation is saved.</div>{% endif %}
 <div class="chat">{% for h in history %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
 <form method="post" action="/tutor/{{ m.id }}">
 <input type="hidden" name="problem" value="{{ problem or '' }}">
 <textarea name="message" style="min-height:5rem" autofocus placeholder="Ask, or state what you think is true."></textarea>
-<p><button>Send</button></p>
+<p><button>Send</button> <form method="post" action="/tutor/{{ m.id }}/clear" style="display:inline"><input type="hidden" name="problem" value="{{ problem or '' }}"><button class="secondary" type="submit">Start over</button></form></p>
 </form>
 {% endblock %}

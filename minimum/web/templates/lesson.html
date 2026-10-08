@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block content %}
+<p class="mute"><a href="/module/{{ m.id }}">{{ m.title }}</a> · concept {{ index + 1 }} of {{ m.concepts|length }}{% if not lesson.verified %} · <span class="bad">this lesson did not pass verification; read it critically</span>{% endif %}</p>
+<h1>{{ body.title }}</h1>
+<p><strong>In the text:</strong> {{ body.textbook_section }}{% if primary %} <span class="mute">({{ primary.title }}, {{ primary.author }})</span>{% endif %}</p>
+<p>{{ body.why_it_matters }}</p>
+<div class="lesson">{{ body.body_markdown|md|safe }}</div>
+<h2>Worked examples</h2>
+{% for ex in body.worked_examples %}<div class="card"><strong>Example {{ loop.index }}.</strong> {{ ex.problem|md|safe }}<details><summary>Solution (work it first)</summary>{{ ex.solution|md|safe }}</details></div>{% endfor %}
+<h2>The mistake to watch for</h2>
+<p>{{ body.common_mistake|md|safe }}</p>
+<h2 id="reading">Now read the text</h2>
+<p>Open {% if primary %}<em>{{ primary.title }}</em>, {% endif %}{{ body.textbook_section }}, with pen and paper. Reproduce every derivation. The lesson was the on-ramp; the text is the standard you will be examined to.</p>
+{% if m.materials %}<p class="mute">Supporting material for this module is listed on the <a href="/module/{{ m.id }}#materials">module page</a>.</p>{% endif %}
+<h2 id="check">Check question</h2>
+<p>{{ body.check_question|md|safe }}</p>
+<div class="chat">{% for h in feedback %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
+<form method="post" action="/lesson/{{ m.id }}/{{ index }}/check"><textarea name="answer" style="min-height:7rem" placeholder="Answer in your own words. The tutor judges it against the lesson."></textarea><p><button>Submit answer</button></p></form>
+<div class="row">
+  <form method="post" action="/lesson/{{ m.id }}/{{ index }}/done"><button {% if studied %}class="secondary"{% endif %}>{% if studied %}Studied ✓{% else %}Mark studied and continue{% endif %}</button></form>
+  {% if prev is not none %}<a href="/lesson/{{ m.id }}/{{ prev }}"><button class="secondary" type="button">← Previous</button></a>{% endif %}
+  {% if nxt is not none %}<a href="/lesson/{{ m.id }}/{{ nxt }}"><button class="secondary" type="button">Next →</button></a>{% endif %}
+  <a href="/lesson/{{ m.id }}/{{ index }}?regenerate=1" class="mute" style="margin-left:auto;font-size:.85rem">regenerate this lesson</a>
+</div>
+{% endblock %}

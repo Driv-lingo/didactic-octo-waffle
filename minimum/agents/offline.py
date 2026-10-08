@@ -15,11 +15,13 @@ from .schemas import (
     ExaminerTurn,
     GraderVerdict,
     LectureReview,
+    LessonOut,
     PacingPlan,
     PlanBlock,
     RubricScore,
     TutorReply,
     VerifierVerdict,
+    WorkedExample,
 )
 
 OFFLINE = "[offline faculty: no model is connected; this is a placeholder]"
@@ -90,6 +92,11 @@ def offline_handler(role: str, system: str, messages: list[dict], schema: type[B
         blocks = [PlanBlock(block="retrieval", minutes=max(15, 2 * due), task=f"Review {due} due cards", why="retrieval comes first")]
         blocks.append(PlanBlock(block="problem sets", minutes=120, task="Work the current module's problem set", why="default offline plan"))
         return PacingPlan(blocks=blocks, warnings=[OFFLINE], drift_risk="unknown", message=OFFLINE + " Default plan only.")
+    if schema is LessonOut:
+        return LessonOut(title=OFFLINE + " lesson placeholder", textbook_section="see the module's primary text", why_it_matters=OFFLINE,
+                         body_markdown=OFFLINE + " No lesson can be written without a model. Read the primary text's section for this concept.",
+                         worked_examples=[WorkedExample(problem=OFFLINE, solution=OFFLINE), WorkedExample(problem=OFFLINE, solution=OFFLINE)],
+                         common_mistake=OFFLINE, check_question=OFFLINE, check_answer_outline=OFFLINE)
     if schema is AdvisorReply:
         return AdvisorReply(reply=OFFLINE, critique=[], next_actions=[])
     if schema is LectureReview:

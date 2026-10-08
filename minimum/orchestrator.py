@@ -14,15 +14,17 @@ Three rules live here and nowhere else:
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-from .agents import Advisor, Critic, Examiner, Grader, Pacer, Tutor, Verifier
+from .agents import Advisor, Critic, Examiner, Grader, Lecturer, Pacer, Tutor, Verifier
 from .agents.faculty import (
     AdvisorView,
     CriticView,
     ExaminerView,
     GraderView,
+    LecturerView,
     PacerView,
     TutorView,
     VerifierView,
@@ -33,6 +35,7 @@ from .agents.schemas import (
     ExaminerTurn,
     GraderVerdict,
     LectureReview,
+    LessonOut,
     PacingPlan,
     TutorReply,
     VerifierVerdict,
@@ -90,6 +93,9 @@ class Orchestrator:
         self.pacer = Pacer(client)
         self.advisor = Advisor(client)
         self.critic = Critic(client)
+        self.lecturer = Lecturer(client)
+        self._lesson_locks: dict[tuple[str, str], threading.Lock] = {}
+        self._lesson_locks_guard = threading.Lock()
 
     # --- enrolment and modules -------------------------------------------
     def enroll(self, learner: str) -> None:
@@ -108,7 +114,80 @@ class Orchestrator:
                 self.store.upsert_card(learner, new_card(cid, module_id, f"State and explain: {concept}"))
                 created += 1
         self.store.log(learner, "module_started", {"module": module_id, "cards": created})
+        self.store.set_current_module(learner, module_id)
         return created
+
+    # --- lessons -----------------------------------------------------------
+    def lecturer_view(self, module_id: str, concept: str) -> LecturerView:
+        mod = self.bundle.course.module(module_id)
+        return LecturerView(
+            module_title=mod.title,
+            module_summary=mod.summary,
+            field=mod.field,
+            concept=concept,
+            all_concepts=mod.concepts,
+            outcomes=mod.outcomes,
+            texts=[f"{t.title} ({t.author}){': ' + t.note if t.note else ''}" for t in mod.texts],
+            prerequisites=[self.bundle.course.module(p).title for p in mod.prerequisites],
+        )
+
+    def _lock_for(self, key: tuple[str, str]) -> threading.Lock:
+        with self._lesson_locks_guard:
+            return self._lesson_locks.setdefault(key, threading.Lock())
+
+    def get_lesson(self, module_id: str, concept: str, regenerate: bool = False) -> dict:
+        """Return the stored lesson, generating and verifying it on first request."""
+        if not regenerate:
+            existing = self.store.lesson(module_id, concept)
+            if existing:
+                return existing
+        with self._lock_for((module_id, concept)):
+            if not regenerate:
+                existing = self.store.lesson(module_id, concept)
+                if existing:
+                    return existing
+            view = self.lecturer_view(module_id, concept)
+            lesson = self.lecturer.write(view)
+            check = self._verify("lecturer", view.render(), lesson.model_dump_json(), None)
+            if not check.approved and check.severity == "major":
+                lesson = self.lecturer.write(view, fix="\n".join(f"- {i}" for i in check.issues))
+                check = self._verify("lecturer", view.render(), lesson.model_dump_json(), None)
+            self.store.save_lesson(module_id, concept, lesson.model_dump(), check.approved, "; ".join(check.issues))
+            return self.store.lesson(module_id, concept)
+
+    def pregenerate_lessons(self, module_id: str) -> threading.Thread:
+        """Generate every missing lesson for a module in the background."""
+        mod = self.bundle.course.module(module_id)
+
+        def run():
+            for c in mod.concepts:
+                try:
+                    self.get_lesson(module_id, c)
+                except Exception:  # noqa: BLE001 - background work must never crash the app
+                    pass
+
+        t = threading.Thread(target=run, daemon=True)
+        t.start()
+        return t
+
+    def check_lesson_answer(self, learner: str, module_id: str, concept: str, answer: str) -> TutorReply:
+        """The tutor judges the learner's answer to the lesson's check question."""
+        lesson = self.get_lesson(module_id, concept)
+        body = lesson["body"]
+        view = self.tutor_view(learner, module_id, None)
+        prompt = (
+            f"The learner has just studied the lesson on '{concept}' and is answering its check question.\n"
+            f"QUESTION: {body['check_question']}\n"
+            f"WHAT A CORRECT ANSWER MUST CONTAIN: {body['check_answer_outline']}\n\n"
+            f"LEARNER'S ANSWER:\n{answer}\n\n"
+            "Say whether it is correct. If not, say exactly what is missing or wrong and ask one question that would lead them to it. Record an edge note if it reveals a gap."
+        )
+        reply = self.tutor.reply(view, [], prompt)
+        self._record_edges(learner, module_id, reply.edge_notes, "tutor")
+        return reply
+
+    def mark_lesson_done(self, learner: str, module_id: str, concept: str) -> None:
+        self.store.log(learner, "lesson_done", {"module": module_id, "concept": concept})
 
     # --- problems ----------------------------------------------------------
     def problem(self, problem_id: str) -> Problem:
@@ -172,6 +251,20 @@ class Orchestrator:
         self._record_edges(learner, module_id, reply.edge_notes, "tutor")
         self.store.log(learner, "tutor_turn", {"module": module_id, "problem": problem_id, "verified": verdict.approved})
         return reply, verdict.approved
+
+    # --- persistent chats (tutor, advisor) ----------------------------------
+    def chat_turn(self, learner: str, key: str, module_id: str | None, message: str, problem_id: str | None = None):
+        """One turn of a stored conversation. key is 'tutor:<module>:<problem>' or 'advisor'."""
+        history = self.store.chat(learner, key)
+        if key == "advisor":
+            r = self.advise(learner, history, message)
+            text = r.reply + "".join(f"\n- critique: {x}" for x in r.critique) + "".join(f"\n- next: {x}" for x in r.next_actions)
+        else:
+            reply, ok = self.tutor_turn(learner, module_id, history, message, problem_id)
+            text = reply.reply + ("" if ok else "  [unverified]")
+        self.store.add_chat(learner, key, "user", message)
+        self.store.add_chat(learner, key, "assistant", text)
+        return text
 
     # --- grading -----------------------------------------------------------
     def _deterministic(self, p: Problem, content: str) -> tuple[float | None, str | None]:
@@ -318,7 +411,28 @@ class Orchestrator:
         sess.last = turn
         sess.asked = 1
         sess.history.append(self.examiner.assistant(turn.question))
+        self._save_oral(sess)
         return sess
+
+    def _save_oral(self, sess: OralSession) -> None:
+        self.store.save_oral(sess.attempt_id, sess.learner, sess.exam_id, {
+            "view": sess.view.model_dump(), "history": sess.history, "asked": sess.asked,
+            "last": sess.last.model_dump() if sess.last else None,
+        })
+
+    def resume_oral(self, learner: str, exam_id: str) -> OralSession | None:
+        """The open oral session for this exam, if one survives in the store."""
+        found = self.store.load_oral(learner, exam_id)
+        if not found:
+            return None
+        att_id, state = found
+        att = next((a for a in self.store.exam_attempts(learner, exam_id) if a.id == att_id), None)
+        if att is None or att.finished_at is not None:
+            self.store.delete_oral(att_id)
+            return None
+        return OralSession(learner=learner, exam_id=exam_id, view=ExaminerView.model_validate(state["view"]),
+                           history=state["history"], asked=state["asked"],
+                           last=ExaminerTurn.model_validate(state["last"]) if state.get("last") else None, attempt_id=att_id)
 
     def oral_answer(self, sess: OralSession, answer: str) -> ExaminerTurn:
         if sess.done:
@@ -334,10 +448,13 @@ class Orchestrator:
             for mid in spec.modules:
                 self._record_edges(sess.learner, mid, turn.edge_notes, "examiner")
             self.store.log(sess.learner, "exam_finished", {"exam": sess.exam_id, "attempt": sess.attempt_id, "passed": passed, "level": turn.level_reached})
-        else:
-            sess.asked += 1
-            sess.history.append(self.examiner.assistant(turn.question))
+            self.store.delete_oral(sess.attempt_id)
+            sess.last = turn
+            return turn
+        sess.asked += 1
+        sess.history.append(self.examiner.assistant(turn.question))
         sess.last = turn
+        self._save_oral(sess)
         return turn
 
     # --- gates -------------------------------------------------------------

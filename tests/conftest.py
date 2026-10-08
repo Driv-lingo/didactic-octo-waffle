@@ -9,11 +9,13 @@ from minimum.agents.schemas import (
     ExaminerTurn,
     GraderVerdict,
     LectureReview,
+    LessonOut,
     PacingPlan,
     PlanBlock,
     RubricScore,
     TutorReply,
     VerifierVerdict,
+    WorkedExample,
 )
 from minimum.content import load_course
 from minimum.llm import FakeClient
@@ -49,9 +51,19 @@ class Script:
         self.examiner_pass = True
         self.examiner_questions = 3
         self.tutor_edges = []
+        self.lessons_written = 0
 
     def __call__(self, role, system, messages, schema):
         text = messages[-1]["content"] if isinstance(messages[-1]["content"], str) else ""
+        if schema is LessonOut:
+            self.lessons_written += 1
+            blob = "\n".join(m["content"] for m in messages if isinstance(m["content"], str))
+            concept = next((ln.split(":", 1)[1].strip() for ln in blob.splitlines() if ln.startswith("CONCEPT TO TEACH:")), "?")
+            return LessonOut(title=f"Lesson on {concept}", textbook_section="ch. 1, sec. 1.1", why_it_matters="It matters.",
+                             body_markdown="## Definition\nLet $x$ be real. $$\\lim_{n\\to\\infty} a_n = L$$",
+                             worked_examples=[WorkedExample(problem="p1", solution="s1"), WorkedExample(problem="p2", solution="s2")],
+                             common_mistake="Confusing the order of quantifiers.", check_question="Why does the order of quantifiers matter?",
+                             check_answer_outline="N depends on epsilon")
         if schema is TutorReply:
             return TutorReply(reply="What is the first definition you need?", edge_notes=list(self.tutor_edges), revealed_solution=self.tutor_reveals)
         if schema is GraderVerdict:

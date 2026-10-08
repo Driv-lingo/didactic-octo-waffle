@@ -14,7 +14,18 @@ def test_web_flow_offline(tmp_path):
     assert r.status_code == 200 and "Enroll" in r.text
     assert c.post("/enroll", follow_redirects=False).status_code == 303
     r = c.get("/")
+    assert "Today" in r.text and "Lesson:" in r.text and "Done, next" in r.text
+    r = c.get("/progress")
     assert "p1 · The mathematical" in r.text and "Gate 1" in r.text
+    r = c.get("/lesson/p1.analysis/0")
+    assert r.status_code == 200 and "Check question" in r.text and "katex" in r.text
+    c.post("/lesson/p1.analysis/0/check", data={"answer": "an answer"})
+    assert "offline faculty" in c.get("/lesson/p1.analysis/0").text
+    r = c.post("/lesson/p1.analysis/0/done", follow_redirects=False)
+    assert r.status_code == 303
+    assert "Lesson: completeness" in c.get("/").text
+    assert "Lectures and open material" in c.get("/module/p1.analysis").text
+    assert "Advisor" not in c.get("/").text.split("<main>")[0]
     assert "p1.analysis" in c.get("/curriculum").text
     assert c.post("/module/p1.ode/start", follow_redirects=False).status_code == 303
     r = c.get("/module/p1.ode")

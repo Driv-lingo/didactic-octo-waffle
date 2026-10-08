@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% block content %}
 <h1>Weekly lecture</h1>
-<p class="mute">Write a lecture on earlier material as if teaching a strong student. Correctness first.</p>
+<div class="card mute">Once a week you teach. Pick a module you studied at least a week ago and write the lecture you would give a strong student: definitions, the main result, its derivation, one example. The critic grades correctness first and clarity second, and anything you get wrong becomes a retrieval card. This is the test that exposes understanding you only think you have.</div>
 {% if review %}<div class="card"><strong>Correctness {{ review.correctness }}/10 · Clarity {{ review.clarity }}/10</strong>{% if not verified %} <span class="bad">unverified</span>{% endif %}
 {% if review.errors %}<ul>{% for e in review.errors %}<li class="bad">{{ e }}</li>{% endfor %}</ul>{% endif %}<pre>{{ review.feedback }}</pre></div>{% endif %}
 <form method="post" action="/lecture">

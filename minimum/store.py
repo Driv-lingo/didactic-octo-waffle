@@ -72,6 +72,36 @@ CREATE TABLE IF NOT EXISTS review_card (
     last_grade INTEGER,
     PRIMARY KEY (learner, card_id)
 );
+CREATE TABLE IF NOT EXISTS lesson (
+    module TEXT NOT NULL,
+    concept TEXT NOT NULL,
+    body TEXT NOT NULL,
+    verified INTEGER NOT NULL,
+    verifier_notes TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (module, concept)
+);
+CREATE TABLE IF NOT EXISTS chat (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    learner TEXT NOT NULL,
+    key TEXT NOT NULL,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS oral_session (
+    attempt_id INTEGER PRIMARY KEY,
+    learner TEXT NOT NULL,
+    exam_id TEXT NOT NULL,
+    state TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS day (
+    learner TEXT NOT NULL,
+    date TEXT NOT NULL,
+    steps TEXT NOT NULL,
+    done TEXT NOT NULL DEFAULT '[]',
+    PRIMARY KEY (learner, date)
+);
 CREATE TABLE IF NOT EXISTS event (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     learner TEXT NOT NULL,
@@ -100,7 +130,14 @@ class Store:
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self._migrate()
         self.on_commit = None  # optional callback, invoked after every commit
+
+    def _migrate(self) -> None:
+        cols = {r["name"] for r in self.conn.execute("PRAGMA table_info(learner)")}
+        if "current_module" not in cols:
+            self.conn.execute("ALTER TABLE learner ADD COLUMN current_module TEXT")
+            self.conn.commit()
 
     def close(self) -> None:
         self.conn.close()
@@ -138,6 +175,10 @@ class Store:
 
     def set_phase(self, name: str, phase_id: str) -> None:
         self.conn.execute("UPDATE learner SET current_phase=? WHERE name=?", (phase_id, name))
+        self._commit()
+
+    def set_current_module(self, name: str, module_id: str | None) -> None:
+        self.conn.execute("UPDATE learner SET current_module=? WHERE name=?", (module_id, name))
         self._commit()
 
     def set_anchors(self, name: str, anchors: list[str]) -> None:
@@ -334,6 +375,65 @@ class Store:
         d = dict(r)
         d["due_at"] = _dt(d["due_at"])
         return d
+
+    # --- lessons (per course, not per learner) -----------------------------
+    def lesson(self, module: str, concept: str) -> dict | None:
+        r = self.conn.execute("SELECT * FROM lesson WHERE module=? AND concept=?", (module, concept)).fetchone()
+        if r is None:
+            return None
+        d = dict(r)
+        d["body"] = json.loads(d["body"])
+        d["verified"] = bool(d["verified"])
+        return d
+
+    def save_lesson(self, module: str, concept: str, body: dict, verified: bool, notes: str) -> None:
+        self.conn.execute(
+            "INSERT OR REPLACE INTO lesson VALUES (?,?,?,?,?,?)",
+            (module, concept, json.dumps(body), int(verified), notes, _iso(_now())),
+        )
+        self._commit()
+
+    def lessons_for(self, module: str) -> dict[str, dict]:
+        rows = self.conn.execute("SELECT * FROM lesson WHERE module=?", (module,)).fetchall()
+        out = {}
+        for r in rows:
+            d = dict(r); d["body"] = json.loads(d["body"]); d["verified"] = bool(d["verified"])
+            out[d["concept"]] = d
+        return out
+
+    # --- chats and oral sessions -------------------------------------------
+    def chat(self, learner: str, key: str) -> list[dict]:
+        rows = self.conn.execute("SELECT role, content FROM chat WHERE learner=? AND key=? ORDER BY id", (learner, key)).fetchall()
+        return [{"role": r["role"], "content": r["content"]} for r in rows]
+
+    def add_chat(self, learner: str, key: str, role: str, content: str) -> None:
+        self.conn.execute("INSERT INTO chat(learner, key, role, content, at) VALUES (?,?,?,?,?)", (learner, key, role, content, _iso(_now())))
+        self._commit()
+
+    def clear_chat(self, learner: str, key: str) -> None:
+        self.conn.execute("DELETE FROM chat WHERE learner=? AND key=?", (learner, key))
+        self._commit()
+
+    def save_oral(self, attempt_id: int, learner: str, exam_id: str, state: dict) -> None:
+        self.conn.execute("INSERT OR REPLACE INTO oral_session VALUES (?,?,?,?)", (attempt_id, learner, exam_id, json.dumps(state)))
+        self._commit()
+
+    def load_oral(self, learner: str, exam_id: str) -> tuple[int, dict] | None:
+        r = self.conn.execute("SELECT attempt_id, state FROM oral_session WHERE learner=? AND exam_id=? ORDER BY attempt_id DESC LIMIT 1", (learner, exam_id)).fetchone()
+        return (r["attempt_id"], json.loads(r["state"])) if r else None
+
+    def delete_oral(self, attempt_id: int) -> None:
+        self.conn.execute("DELETE FROM oral_session WHERE attempt_id=?", (attempt_id,))
+        self._commit()
+
+    # --- the day -------------------------------------------------------------
+    def day(self, learner: str, date: str) -> dict | None:
+        r = self.conn.execute("SELECT * FROM day WHERE learner=? AND date=?", (learner, date)).fetchone()
+        return {"steps": json.loads(r["steps"]), "done": json.loads(r["done"])} if r else None
+
+    def save_day(self, learner: str, date: str, steps: list[dict], done: list[str]) -> None:
+        self.conn.execute("INSERT OR REPLACE INTO day VALUES (?,?,?,?)", (learner, date, json.dumps(steps), json.dumps(done)))
+        self._commit()
 
     # --- events ----------------------------------------------------------
     def log(self, learner: str, kind: str, payload: dict) -> None:

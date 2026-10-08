@@ -136,6 +136,66 @@ def start(c: Ctx, module_id: str) -> None:
 
 
 @main.command()
+@click.pass_obj
+def today(c: Ctx) -> None:
+    """The guided day: ordered steps, with what is done."""
+    from .day import load_or_build_day
+
+    steps, done = load_or_build_day(c.bundle, c.orch.store, c.learner)
+    for i, st in enumerate(steps, 1):
+        mark = "✓" if st.id in done else " "
+        click.echo(f"[{mark}] {i}. {st.title}  ({st.minutes} min)\n       {st.detail}")
+
+
+@main.command()
+@click.argument("module_id")
+@click.argument("index", type=int)
+@click.pass_obj
+def lesson(c: Ctx, module_id: str, index: int) -> None:
+    """Print a lesson (generated and verified on first request)."""
+    m = c.bundle.course.module(module_id)
+    les = c.orch.get_lesson(module_id, m.concepts[index])
+    b = les["body"]
+    click.echo(f"# {b['title']}\nIn the text: {b['textbook_section']}" + ("" if les["verified"] else "\n[UNVERIFIED: " + les["verifier_notes"] + "]"))
+    click.echo("\n" + b["why_it_matters"] + "\n\n" + b["body_markdown"])
+    for i, ex in enumerate(b["worked_examples"], 1):
+        click.echo(f"\n## Example {i}\n{ex['problem']}\n\nSolution:\n{ex['solution']}")
+    click.echo(f"\n## Mistake to watch for\n{b['common_mistake']}\n\n## Check question\n{b['check_question']}")
+
+
+@main.command()
+@click.option("--timeout", default=15.0, show_default=True)
+@click.pass_obj
+def links(c: Ctx, timeout: float) -> None:
+    """Check every material and text URL in the course resolves."""
+    import urllib.error
+    import urllib.request
+
+    bad = 0
+    seen = set()
+    for m in c.bundle.course.all_modules():
+        items = [(x.title, x.url) for x in m.materials] + [(t.title, t.url) for t in m.texts if t.url]
+        for title, url in items:
+            if url in seen:
+                continue
+            seen.add(url)
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (minimum link check)"}, method="GET")
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as resp:
+                    code = resp.status
+            except urllib.error.HTTPError as exc:
+                code = exc.code
+            except Exception as exc:  # noqa: BLE001
+                code = f"ERR {type(exc).__name__}"
+            ok = isinstance(code, int) and code < 400
+            bad += 0 if ok else 1
+            click.echo(f"{'ok ' if ok else 'BAD'} {code}  {m.id:14s} {url}")
+    click.echo(f"\n{len(seen)} links checked, {bad} bad")
+    if bad:
+        sys.exit(1)
+
+
+@main.command()
 @click.argument("module_id", required=False)
 @click.pass_obj
 def problems(c: Ctx, module_id: str | None) -> None:

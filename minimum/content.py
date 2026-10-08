@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
-from .models import Course, Problem
+from .models import Course, Material, Problem
 
 
 class FixedExam(BaseModel):
@@ -91,6 +91,15 @@ def _read_yaml(path: Path):
 def load_course(root: str | Path) -> CourseBundle:
     root = Path(root)
     course = Course.model_validate(_read_yaml(root / "course.yaml"))
+    mats_path = root / "materials.yaml"
+    if mats_path.exists():
+        mats = _read_yaml(mats_path) or {}
+        for m in course.all_modules():
+            if m.id in mats:
+                m.materials = [Material.model_validate(x) for x in mats[m.id]]
+        unknown = set(mats) - {m.id for m in course.all_modules()}
+        if unknown:
+            raise ValueError(f"materials.yaml names unknown modules: {sorted(unknown)}")
     problems: dict[str, Problem] = {}
     for f in sorted((root / "problems").glob("*.yaml")):
         for raw in _read_yaml(f) or []:
