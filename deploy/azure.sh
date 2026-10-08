@@ -62,12 +62,21 @@ else
 fi
 
 echo "== storage for the learner database"
+# Prefer the account the environment already references, so reruns never drift to another one.
+STORAGE_REF=$(az containerapp env storage show -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" --query properties.azureFile.accountName -o tsv 2>/dev/null || true)
 EXISTING=$(az storage account list -g "$RG" --query "[?starts_with(name,'minimum')].name | [0]" -o tsv)
-if [ -n "$EXISTING" ]; then STORAGE="$EXISTING"; else
+if [ -n "$STORAGE_REF" ]; then STORAGE="$STORAGE_REF"; elif [ -n "$EXISTING" ]; then STORAGE="$EXISTING"; else
   az storage account create -g "$RG" -n "$STORAGE" -l "$LOCATION" --sku Standard_LRS --kind StorageV2 --only-show-errors >/dev/null
 fi
 KEY=$(az storage account keys list -g "$RG" -n "$STORAGE" --query "[0].value" -o tsv)
-az storage share-rm create --storage-account "$STORAGE" --name "$SHARE" --quota 5 --only-show-errors >/dev/null 2>&1 || true
+if [ "$(az storage share-rm exists -g "$RG" --storage-account "$STORAGE" --name "$SHARE" --query exists -o tsv 2>/dev/null)" != "true" ]; then
+  echo "   creating file share $SHARE on $STORAGE"
+  az storage share-rm create -g "$RG" --storage-account "$STORAGE" --name "$SHARE" --quota 5 --only-show-errors >/dev/null
+fi
+if [ "$(az storage share-rm exists -g "$RG" --storage-account "$STORAGE" --name "$SHARE" --query exists -o tsv)" != "true" ]; then
+  echo "STORAGE FAILED: file share $SHARE does not exist on $STORAGE and could not be created."; exit 1
+fi
+echo "   using share $SHARE on storage account $STORAGE"
 az containerapp env storage set -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" \
   --azure-file-account-name "$STORAGE" --azure-file-account-key "$KEY" --azure-file-share-name "$SHARE" \
   --access-mode ReadWrite --only-show-errors >/dev/null
