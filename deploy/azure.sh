@@ -162,14 +162,16 @@ az containerapp update -g "$RG" -n "$APP" --yaml "$TMP" --only-show-errors >/dev
 rm -f "$TMP"
 
 echo "== waiting for the new revision to become ready"
+LATEST=""; READY=""
 for i in $(seq 1 30); do
-  read -r LATEST READY < <(az containerapp show -g "$RG" -n "$APP" --only-show-errors \
-    --query "[properties.latestRevisionName, properties.latestReadyRevisionName]" -o tsv | tr '\n' ' ')
-  [ "$LATEST" = "$READY" ] && break
+  LATEST=$(az containerapp show -g "$RG" -n "$APP" --only-show-errors --query properties.latestRevisionName -o tsv || true)
+  READY=$(az containerapp show -g "$RG" -n "$APP" --only-show-errors --query properties.latestReadyRevisionName -o tsv || true)
+  if [ -n "$LATEST" ] && [ "$LATEST" = "$READY" ]; then break; fi
   printf '.'
   sleep 10
 done
 echo
+echo "   latest revision: $LATEST   ready revision: $READY"
 if [ "$LATEST" != "$READY" ]; then
   echo "DEPLOY FAILED: revision $LATEST never became ready; $READY is still serving. Recent system log:"
   az containerapp logs show -g "$RG" -n "$APP" --type system --tail 40 --only-show-errors 2>/dev/null || true
