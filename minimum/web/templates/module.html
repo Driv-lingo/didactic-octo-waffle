@@ -1,18 +1,21 @@
 {% extends "base.html" %}{% block content %}
+<div class="eyebrow">{{ m.id }} · {{ m.field }} · {{ m.weeks }} weeks</div>
 <h1>{{ m.title }}</h1>
-<p>{{ m.summary }}</p>
-<div class="row">
-  <form method="post" action="/module/{{ m.id }}/start"><button {% if started %}class="secondary"{% endif %}>{% if started %}Started{% else %}Start module{% endif %}</button></form>
-  <a href="/tutor/{{ m.id }}"><button class="secondary" type="button">Talk to the tutor</button></a>
+<p class="prose">{{ m.summary }}</p>
+<div class="actions">
+  <form class="inline" method="post" action="/module/{{ m.id }}/start"><button class="btn {% if started %}secondary{% endif %}">{% if started %}Started{% else %}Start module{% endif %}</button></form>
+  <a class="btn secondary" href="/tutor/{{ m.id }}">Talk to the tutor</a>
 </div>
-<h3>Lessons</h3>
-<table>{% for c in m.concepts %}<tr><td>{% if c in studied %}<span class="good">✓</span>{% elif c in have %}<span class="mute">ready</span>{% endif %}</td><td><a href="/lesson/{{ m.id }}/{{ loop.index0 }}">{{ loop.index }}. {{ c }}</a></td></tr>{% endfor %}</table>
-<p class="mute">Lessons are written by the faculty and checked by the verifier the first time you open them, which takes about a minute each. Starting the module writes them all in the background.</p>
-<h3>Outcomes</h3><ul>{% for o in m.outcomes %}<li>{{ o }}</li>{% endfor %}</ul>
-<h3>Texts</h3><ul>{% for t in m.texts %}<li>{{ t.title }} ({{ t.author }}){% if t.open_access and t.url %} · <a href="{{ t.url }}">open access</a>{% endif %}{% if t.note %} <span class="mute">— {{ t.note }}</span>{% endif %}</li>{% endfor %}</ul>
-{% if m.materials %}<h3 id="materials">Lectures and open material</h3>
-<table>{% for x in m.materials %}<tr><td class="mute">{{ x.kind }}</td><td><a href="{{ x.url }}">{{ x.title }}</a>{% if x.placement %}<br><span class="mute">{{ x.placement }}</span>{% endif %}{% if x.note %}<br><span class="mute">{{ x.note }}</span>{% endif %}</td></tr>{% endfor %}</table>{% endif %}
-{% if m.project %}<h3 id="project">Project</h3><p>{{ m.project }}</p>{% endif %}
-<h3>Problems</h3>
-<table>{% for p in probs %}<tr><td>{% if p.id in done %}<span class="good">✓</span>{% endif %}</td><td><a href="/problem/{{ p.id }}">{{ p.id }}</a></td><td class="mute">d{{ p.difficulty }} · {{ p.kind.value }} · {{ p.max_score }} pts</td><td>{{ p.statement.strip().splitlines()[0][:90] }}</td></tr>{% endfor %}</table>
+<h2>Lessons</h2>
+<div class="card flat list">{% for c in m.concepts %}<div style="display:flex; gap:.75rem; align-items:center"><span style="width:1.4rem">{% if c in studied %}<span class="pill good">✓</span>{% elif c in have %}<span class="pill accent">ready</span>{% endif %}</span><a href="/lesson/{{ m.id }}/{{ loop.index0 }}">{{ loop.index }}. {{ c }}</a></div>{% endfor %}</div>
+<p class="small faint">Each lesson is written by the faculty and checked by the verifier the first time it is opened, about a minute each. Starting the module writes them all in the background.</p>
+<h2>Outcomes</h2>
+<ul class="prose">{% for o in m.outcomes %}<li>{{ o }}</li>{% endfor %}</ul>
+<h2>Texts</h2>
+<div class="card flat list">{% for t in m.texts %}<div><strong>{{ t.title }}</strong> <span class="muted">{{ t.author }}</span>{% if t.open_access and t.url %} <a class="pill accent" href="{{ t.url }}">open access</a>{% endif %}{% if t.note %}<div class="small muted">{{ t.note }}</div>{% endif %}</div>{% endfor %}</div>
+{% if m.materials %}<h2 id="materials">Lectures and open material</h2>
+<div class="card flat list">{% for x in m.materials %}<div><span class="pill">{{ x.kind }}</span> <a href="{{ x.url }}"><strong>{{ x.title }}</strong></a>{% if x.placement %}<div class="small muted">{{ x.placement }}</div>{% endif %}{% if x.note %}<div class="small muted">{{ x.note }}</div>{% endif %}</div>{% endfor %}</div>{% endif %}
+{% if m.project %}<h2 id="project">Project</h2><p class="prose">{{ m.project }}</p>{% endif %}
+<h2>Problems</h2>
+<div class="card flat"><table><tbody>{% for p in probs %}<tr><td style="width:1.5rem">{% if p.id in done %}<span class="pill good">✓</span>{% endif %}</td><td><a href="/problem/{{ p.id }}">{{ p.id }}</a><div class="small faint">d{{ p.difficulty }} · {{ p.kind.value }} · {{ p.max_score }} pts</div></td><td class="muted small">{{ p.statement.strip().splitlines()[0][:100] }}</td></tr>{% endfor %}</tbody></table></div>
 {% endblock %}

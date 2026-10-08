@@ -1,7 +1,14 @@
 {% extends "base.html" %}{% block content %}
+<div class="eyebrow">Enrolment</div>
 <h1>{{ course.title }}</h1>
-<p class="mute">{{ course.tagline }}</p>
-<p>About {{ course.total_hours }} hours over roughly {{ course.expected_months }} months at {{ course.weekly_hours }} hours a week. Read the rules. They do not change.</p>
-<ul>{% for r in course.rules %}<li>{{ r }}</li>{% endfor %}</ul>
-<form method="post" action="/enroll"><button>Enroll</button></form>
+<p class="prose" style="font-size:1.15rem">{{ course.tagline }}</p>
+<div class="grid cols-3" style="margin:1.25rem 0">
+  <div class="card flat"><div class="eyebrow">Load</div><div class="stat">{{ course.total_hours }}<small>hours</small></div></div>
+  <div class="card flat"><div class="eyebrow">Expected</div><div class="stat">{{ course.expected_months }}<small>months</small></div></div>
+  <div class="card flat"><div class="eyebrow">Per week</div><div class="stat">{{ course.weekly_hours }}<small>hours</small></div></div>
+</div>
+<h2>The rules</h2>
+<p class="muted">They do not change. Read them once, properly.</p>
+<ol class="prose" style="padding-left:1.25rem">{% for r in course.rules %}<li>{{ r }}</li>{% endfor %}</ol>
+<form method="post" action="/enroll" class="actions"><button class="btn">Enroll</button><span class="working">Enrolling…</span></form>
 {% endblock %}

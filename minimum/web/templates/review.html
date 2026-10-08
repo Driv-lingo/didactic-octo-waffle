@@ -1,8 +1,9 @@
 {% extends "base.html" %}{% block content %}
-<h1>Retrieval</h1>
+<div class="eyebrow">Retrieval{% if card %} · {{ remaining }} due{% endif %}</div>
+<h1>{% if card %}Say it before you look{% else %}Nothing due{% endif %}</h1>
 {% if card %}
-<p class="mute">{{ remaining }} due. Answer out loud or on paper first. Then grade yourself: 0 to 2 forgot, 3 hard, 4 good, 5 easy.</p>
-<div class="card"><strong>{{ card.module }}</strong><pre>{{ card.prompt }}</pre></div>
-<form method="post" action="/review/{{ card.card_id }}">{% for g in range(6) %}<button name="grade" value="{{ g }}" {% if g < 3 %}class="secondary"{% endif %}>{{ g }}</button> {% endfor %}</form>
-{% else %}<p>Nothing due. <a href="/">Back</a></p>{% endif %}
+<p class="muted">Answer out loud or on paper first. Then grade yourself: 0 to 2 forgot, 3 hard, 4 good, 5 easy. The schedule only works if you are honest.</p>
+<div class="card"><div class="eyebrow">{{ card.module }}</div><div class="prose">{{ card.prompt|md|safe }}</div></div>
+<form method="post" action="/review/{{ card.card_id }}" class="gradebtns" style="margin-top:1rem">{% for g in range(6) %}<button class="btn {% if g < 3 %}ghost{% elif g < 5 %}secondary{% endif %}" name="grade" value="{{ g }}">{{ g }}</button>{% endfor %}</form>
+{% else %}<p class="muted">Come back when cards come due. <a href="/">Today</a></p>{% endif %}
 {% endblock %}

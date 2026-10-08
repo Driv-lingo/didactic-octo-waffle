@@ -1,17 +1,24 @@
 {% extends "base.html" %}{% block content %}
-<h1>{{ spec.title }} · attempt {{ att.id }}</h1>
+<div class="eyebrow">Exam room</div>
 {% if results is none %}
-<p class="mute">Time allowed: {{ spec.duration_minutes }} minutes. Closed book. Started {{ att.started_at.strftime('%H:%M') }} UTC. Every problem counts; a blank scores zero.</p>
+<div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap"><h1 style="margin:0">{{ spec.title }}</h1><span class="clock" id="clock" data-start="{{ att.started_at.isoformat() }}" data-minutes="{{ spec.duration_minutes }}">{{ spec.duration_minutes }}:00</span></div>
+<p class="muted">Closed book. {{ spec.duration_minutes }} minutes from {{ att.started_at.strftime('%H:%M') }} UTC. Every problem counts; a blank scores zero. Submit once, at the end.</p>
 <form method="post" action="/attempt/{{ att.id }}/submit">
 {% for p in probs %}
-<div class="card"><strong>{{ p.id }}</strong> <span class="pill">{{ p.max_score }} pts</span><pre>{{ p.statement }}</pre>
-<textarea name="ans_{{ p.id }}" placeholder="{% if p.kind.value == 'code' %}code{% else %}argument, then ANSWER: ...{% endif %}"></textarea></div>
+<div class="card"><div class="eyebrow">{{ p.id }} · {{ p.max_score }} points</div><div class="prose">{{ p.statement|md|safe }}</div>
+<textarea name="ans_{{ p.id }}" class="{% if p.kind.value == 'code' %}code{% endif %}" placeholder="{% if p.kind.value == 'code' %}code{% else %}argument, then ANSWER: ...{% endif %}"></textarea></div>
 {% endfor %}
-<p><button>Submit the whole exam</button></p>
+<div class="actions"><button class="btn">Submit the whole exam</button><span class="working">Grading every problem; this takes a few minutes…</span></div>
 </form>
+<script>
+(function(){ var el=document.getElementById('clock'); if(!el) return; var end=new Date(el.dataset.start).getTime()+el.dataset.minutes*60000;
+  function tick(){ var s=Math.round((end-Date.now())/1000); var late=s<0; s=Math.abs(s); el.textContent=(late?'-':'')+Math.floor(s/60)+':'+('0'+s%60).slice(-2); el.classList.toggle('late',late); }
+  tick(); setInterval(tick,1000); })();
+</script>
 {% else %}
-<h2 class="{{ 'good' if att.passed else 'bad' }}">{{ 'PASS' if att.passed else 'FAIL' }} · {{ att.score }}/{{ att.max_score }}</h2>
-{% for s, g in results %}<div class="card"><strong><a href="/problem/{{ s.problem_id }}">{{ s.problem_id }}</a></strong>{% if g %} · {{ g.score }}/{{ g.max_score }}{% if not g.verified %} <span class="bad">unverified</span>{% endif %}<pre>{{ g.feedback }}</pre>{% else %} · <span class="mute">blank</span>{% endif %}</div>{% endfor %}
-<p><a href="/">Back</a></p>
+<h1>{{ spec.title }}</h1>
+<div class="card"><div class="stat"><span class="{{ 'pill good' if att.passed else 'pill bad' }}" style="font-size:1rem">{{ 'PASS' if att.passed else 'FAIL' }}</span> {{ att.score }}<small>/ {{ att.max_score }}</small></div></div>
+{% for s, g in results %}<div class="card"><div class="eyebrow"><a href="/problem/{{ s.problem_id }}">{{ s.problem_id }}</a></div>{% if g %}<div class="stat" style="font-size:1.2rem">{{ g.score }}<small>/ {{ g.max_score }}</small>{% if not g.verified %} <span class="pill bad">unverified</span>{% endif %}</div><div class="prose" style="font-size:1rem">{{ g.feedback|md|safe }}</div>{% else %}<span class="muted">blank</span>{% endif %}</div>{% endfor %}
+<p><a class="btn secondary" href="/progress">Back to progress</a></p>
 {% endif %}
 {% endblock %}

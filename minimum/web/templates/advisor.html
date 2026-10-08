@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% block content %}
-<h1>Research advisor</h1>
-{% if not history %}<div class="card mute">The advisor is for the final phase: scoping a reproduction-with-extension project, finding the literature, and reviewing your draft as a hostile referee. It is good at critique and weaker at taste, so bring it a question that is already known to be worth asking.</div>{% endif %}
-<div class="chat">{% for h in history %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
-<form method="post" action="/advisor"><textarea name="message" style="min-height:6rem" autofocus></textarea><p><button>Send</button></p></form>
+<div class="eyebrow">Research advisor</div>
+<h1>Scope it, then defend it</h1>
+{% if not history %}<div class="card flat small muted">The advisor is for the final phase: scoping a reproduction-with-extension project, finding the literature, and reviewing your draft as a hostile referee. It is good at critique and weaker at taste, so bring it a question that is already known to be worth asking.</div>{% endif %}
+<div class="chat">{% for h in history %}<div class="msg {{ 'u' if h.role == 'user' else 'a' }}"><span class="who">{{ 'you' if h.role == 'user' else 'advisor' }}</span>{{ h.content }}</div>{% endfor %}</div>
+<form method="post" action="/advisor"><textarea name="message" style="min-height:6rem" autofocus></textarea><div class="actions"><button class="btn">Send</button><span class="working">Thinking…</span></div></form>
 {% endblock %}

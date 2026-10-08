@@ -75,7 +75,7 @@ p3.emdev:
   - { kind: stretch, title: "Pozar, Microwave Engineering, chapter 2 (transmission line theory)", url: "https://www.wiley.com/en-us/Microwave+Engineering%2C+4th+Edition-p-9780470631553", note: "Derive the telegrapher's equations from a lumped model and state when the lumped abstraction fails." }
 p3.continuum:
   - { kind: video, title: "MIT 2.25 Advanced Fluid Mechanics", url: "https://ocw.mit.edu/courses/2-25-advanced-fluid-mechanics-fall-2013/", placement: "Kinematics, the Navier-Stokes equations, dimensional analysis, and viscous flows." }
-  - { kind: video, title: "NCFMF fluid mechanics films (Shapiro and others)", url: "http://web.mit.edu/fluids/www/Shapiro/ncfmf.html", placement: "Watch Flow Visualization and Boundary Layer Control before the boundary-layer concept." }
+  - { kind: video, title: "NCFMF fluid mechanics films (Shapiro and others)", url: "https://en.wikipedia.org/wiki/National_Committee_for_Fluid_Mechanics_Films", placement: "Watch Flow Visualization and Boundary Layer Control before the boundary-layer concept." }
   - { kind: stretch, title: "Batchelor, An Introduction to Fluid Dynamics, section 4.6 (flow at large Reynolds number)", url: "https://doi.org/10.1017/CBO9780511800955", note: "Why the inviscid limit is singular; relate it to the boundary-layer scaling." }
 p3.heat:
   - { kind: video, title: "MIT 2.51 Intermediate Heat and Mass Transfer", url: "https://ocw.mit.edu/courses/2-51-intermediate-heat-and-mass-transfer-fall-2008/", placement: "Conduction, convection correlations, radiation exchange, and diffusion." }

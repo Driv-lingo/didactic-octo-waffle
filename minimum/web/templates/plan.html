@@ -1,7 +1,8 @@
 {% extends "base.html" %}{% block content %}
-<h1>Today</h1>
-<p>{{ plan.message }}</p>
-<table>{% for b in plan.blocks %}<tr><td>{{ b.minutes }} min</td><td><strong>{{ b.block }}</strong></td><td>{{ b.task }}<br><span class="mute">{{ b.why }}</span></td></tr>{% endfor %}</table>
-{% if plan.warnings %}<h3>Warnings</h3><ul>{% for w in plan.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
-<p>Drift risk: <strong>{{ plan.drift_risk }}</strong></p>
+<div class="eyebrow">Pacing agent</div>
+<h1>Today, as the pacer sees it</h1>
+<p class="prose">{{ plan.message }}</p>
+<div class="card flat"><table><tbody>{% for b in plan.blocks %}<tr><td class="muted" style="white-space:nowrap">{{ b.minutes }} min</td><td><strong>{{ b.block }}</strong><div>{{ b.task }}</div><div class="small faint">{{ b.why }}</div></td></tr>{% endfor %}</tbody></table></div>
+{% if plan.warnings %}<h2>Warnings</h2><ul>{% for w in plan.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+<p>Drift risk: <span class="pill {% if plan.drift_risk == 'high' %}bad{% elif plan.drift_risk == 'medium' %}warn{% else %}good{% endif %}">{{ plan.drift_risk }}</span></p>
 {% endblock %}

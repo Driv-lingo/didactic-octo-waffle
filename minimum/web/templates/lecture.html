@@ -1,11 +1,12 @@
 {% extends "base.html" %}{% block content %}
-<h1>Weekly lecture</h1>
-<div class="card mute">Once a week you teach. Pick a module you studied at least a week ago and write the lecture you would give a strong student: definitions, the main result, its derivation, one example. The critic grades correctness first and clarity second, and anything you get wrong becomes a retrieval card. This is the test that exposes understanding you only think you have.</div>
-{% if review %}<div class="card"><strong>Correctness {{ review.correctness }}/10 · Clarity {{ review.clarity }}/10</strong>{% if not verified %} <span class="bad">unverified</span>{% endif %}
-{% if review.errors %}<ul>{% for e in review.errors %}<li class="bad">{{ e }}</li>{% endfor %}</ul>{% endif %}<pre>{{ review.feedback }}</pre></div>{% endif %}
-<form method="post" action="/lecture">
-<p><select name="module_id">{% for m in modules %}<option value="{{ m.id }}">{{ m.id }} · {{ m.title }}</option>{% endfor %}</select></p>
-<textarea name="text" style="min-height:18rem"></textarea>
-<p><button>Submit for review</button></p>
+<div class="eyebrow">Weekly teach-back</div>
+<h1>Teach it</h1>
+<div class="card flat small muted">Once a week you teach. Pick a module you studied at least a week ago and write the lecture you would give a strong student: definitions, the main result, its derivation, one example. The critic grades correctness first and clarity second, and every error becomes a retrieval card. This is the test that exposes understanding you only think you have.</div>
+{% if review %}<div class="card" style="margin-top:1rem"><div class="stat">{{ review.correctness }}<small>/ 10 correctness</small> &nbsp; {{ review.clarity }}<small>/ 10 clarity</small>{% if not verified %} <span class="pill bad">unverified</span>{% endif %}</div>
+{% if review.errors %}<ul>{% for e in review.errors %}<li class="bad" style="color:var(--bad)">{{ e }}</li>{% endfor %}</ul>{% endif %}<div class="prose">{{ review.feedback|md|safe }}</div></div>{% endif %}
+<form method="post" action="/lecture" style="margin-top:1rem">
+<div class="actions"><select name="module_id">{% for m in modules %}<option value="{{ m.id }}">{{ m.id }} · {{ m.title }}</option>{% endfor %}</select></div>
+<textarea name="text" style="min-height:20rem" placeholder="Write the lecture. LaTeX with $...$ is fine."></textarea>
+<div class="actions"><button class="btn">Submit for review</button><span class="working">The critic is reading…</span></div>
 </form>
 {% endblock %}

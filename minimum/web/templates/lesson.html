@@ -1,24 +1,23 @@
 {% extends "base.html" %}{% block content %}
-<p class="mute"><a href="/module/{{ m.id }}">{{ m.title }}</a> · concept {{ index + 1 }} of {{ m.concepts|length }}{% if not lesson.verified %} · <span class="bad">this lesson did not pass verification; read it critically</span>{% endif %}</p>
+<div class="eyebrow"><a href="/module/{{ m.id }}">{{ m.title }}</a> · concept {{ index + 1 }} of {{ m.concepts|length }}</div>
+{% if not lesson.verified %}<div class="banner bad">This lesson did not pass verification: {{ lesson.verifier_notes or 'see notes' }}. Read it critically and check every claim against the text.</div>{% endif %}
 <h1>{{ body.title }}</h1>
-<p><strong>In the text:</strong> {{ body.textbook_section }}{% if primary %} <span class="mute">({{ primary.title }}, {{ primary.author }})</span>{% endif %}</p>
-<p>{{ body.why_it_matters }}</p>
-<div class="lesson">{{ body.body_markdown|md|safe }}</div>
+<div class="card flat" style="margin:1rem 0"><div class="eyebrow">In the text</div><strong>{{ body.textbook_section }}</strong>{% if primary %} <span class="muted">· {{ primary.title }}, {{ primary.author }}</span>{% endif %}<p class="small muted" style="margin:.4rem 0 0">{{ body.why_it_matters }}</p></div>
+<article class="prose">{{ body.body_markdown|md|safe }}</article>
 <h2>Worked examples</h2>
-{% for ex in body.worked_examples %}<div class="card"><strong>Example {{ loop.index }}.</strong> {{ ex.problem|md|safe }}<details><summary>Solution (work it first)</summary>{{ ex.solution|md|safe }}</details></div>{% endfor %}
+{% for ex in body.worked_examples %}<div class="card"><div class="eyebrow">Example {{ loop.index }}</div><div class="prose">{{ ex.problem|md|safe }}</div><details><summary>Solution (work it on paper first)</summary><div class="prose">{{ ex.solution|md|safe }}</div></details></div>{% endfor %}
 <h2>The mistake to watch for</h2>
-<p>{{ body.common_mistake|md|safe }}</p>
+<div class="prose">{{ body.common_mistake|md|safe }}</div>
 <h2 id="reading">Now read the text</h2>
-<p>Open {% if primary %}<em>{{ primary.title }}</em>, {% endif %}{{ body.textbook_section }}, with pen and paper. Reproduce every derivation. The lesson was the on-ramp; the text is the standard you will be examined to.</p>
-{% if m.materials %}<p class="mute">Supporting material for this module is listed on the <a href="/module/{{ m.id }}#materials">module page</a>.</p>{% endif %}
+<p class="prose">Open {% if primary %}<em>{{ primary.title }}</em>, {% endif %}{{ body.textbook_section }}, with pen and paper. Reproduce every derivation. The lesson was the on-ramp; the text is the standard you will be examined to.{% if m.materials %} Supporting lectures are on the <a href="/module/{{ m.id }}#materials">module page</a>.{% endif %}</p>
 <h2 id="check">Check question</h2>
-<p>{{ body.check_question|md|safe }}</p>
-<div class="chat">{% for h in feedback %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
-<form method="post" action="/lesson/{{ m.id }}/{{ index }}/check"><textarea name="answer" style="min-height:7rem" placeholder="Answer in your own words. The tutor judges it against the lesson."></textarea><p><button>Submit answer</button></p></form>
-<div class="row">
-  <form method="post" action="/lesson/{{ m.id }}/{{ index }}/done"><button {% if studied %}class="secondary"{% endif %}>{% if studied %}Studied ✓{% else %}Mark studied and continue{% endif %}</button></form>
-  {% if prev is not none %}<a href="/lesson/{{ m.id }}/{{ prev }}"><button class="secondary" type="button">← Previous</button></a>{% endif %}
-  {% if nxt is not none %}<a href="/lesson/{{ m.id }}/{{ nxt }}"><button class="secondary" type="button">Next →</button></a>{% endif %}
-  <a href="/lesson/{{ m.id }}/{{ index }}?regenerate=1" class="mute" style="margin-left:auto;font-size:.85rem">regenerate this lesson</a>
+<div class="card"><div class="prose">{{ body.check_question|md|safe }}</div>
+<div class="chat">{% for h in feedback %}<div class="msg {{ 'u' if h.role == 'user' else 'a' }}"><span class="who">{{ 'you' if h.role == 'user' else 'tutor' }}</span>{{ h.content }}</div>{% endfor %}</div>
+<form method="post" action="/lesson/{{ m.id }}/{{ index }}/check"><textarea name="answer" style="min-height:6rem" placeholder="Answer in your own words. The tutor judges it against the lesson."></textarea><div class="actions" style="margin-bottom:0"><button class="btn">Submit answer</button><span class="working">The tutor is reading…</span></div></form></div>
+<div class="actions" style="margin-top:1.5rem">
+  <form class="inline" method="post" action="/lesson/{{ m.id }}/{{ index }}/done"><button class="btn {% if studied %}secondary{% endif %}">{% if studied %}Studied ✓{% else %}Mark studied and continue{% endif %}</button></form>
+  {% if prev is not none %}<a class="btn ghost" href="/lesson/{{ m.id }}/{{ prev }}">← Previous</a>{% endif %}
+  {% if nxt is not none %}<a class="btn ghost" href="/lesson/{{ m.id }}/{{ nxt }}">Next →</a>{% endif %}
+  <a href="/lesson/{{ m.id }}/{{ index }}?regenerate=1" class="small faint" style="margin-left:auto">regenerate this lesson</a>
 </div>
 {% endblock %}

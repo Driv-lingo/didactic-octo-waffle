@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% block content %}
+<div class="eyebrow">Oral examination · Question {{ sess.asked }} of at most {{ spec.max_questions }}</div>
 <h1>{{ spec.title }}</h1>
-<p class="mute">Standard: {{ spec.standard }}. Question {{ sess.asked }} of at most {{ spec.max_questions }}. The examiner does not confirm answers until the end.</p>
-<div class="chat">{% for h in sess.history %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
-<form method="post" action="/oral/{{ spec.id }}"><textarea name="answer" autofocus></textarea><p><button>Answer</button></p></form>
+<p class="muted">Standard: {{ spec.standard }}. The examiner does not confirm answers until the end. It cannot see the tutor's notes on you.</p>
+<div class="chat">{% for h in sess.history %}<div class="msg {{ 'u' if h.role == 'user' else 'a' }}"><span class="who">{{ 'you' if h.role == 'user' else 'examiner' }}</span>{{ h.content }}</div>{% endfor %}</div>
+<form method="post" action="/oral/{{ spec.id }}"><textarea name="answer" autofocus></textarea><div class="actions"><button class="btn">Answer</button><span class="working">The examiner is considering…</span></div></form>
 {% endblock %}

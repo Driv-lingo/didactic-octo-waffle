@@ -1,26 +1,28 @@
 {% extends "base.html" %}{% block content %}
+<div class="eyebrow">Progress</div>
 <h1>{{ phase.id }} · {{ phase.title }}</h1>
-<p class="mute">{{ phase.goal }}</p>
-<div class="row">
-  <div class="card" style="flex:1 1 14rem"><strong>Retrieval</strong><br>{{ status.due }} cards due of {{ status.cards }}<br>retention {{ status.retention }}<br><a href="/review">Review now</a></div>
-  <div class="card" style="flex:1 1 14rem"><strong>Work</strong><br>{{ status.submissions }} submissions<br>{{ status.edge_notes }} edge notes recorded<br><a href="/plan">Today's plan</a></div>
-  <div class="card" style="flex:1 1 14rem"><strong>Anchors</strong><br>{% if status.anchors %}{{ status.anchors|join(", ") }}{% else %}<span class="mute">not chosen (after gate 2)</span>{% endif %}
-    <form method="post" action="/anchors" style="margin-top:.4rem"><input type="text" name="a1" placeholder="field" size="9"> <input type="text" name="a2" placeholder="field" size="9"> <button class="secondary">Set</button></form></div>
+<p class="muted" style="max-width:70ch">{{ phase.goal }}</p>
+<div class="grid cols-3">
+  <div class="card"><div class="eyebrow">Retrieval</div><div class="stat">{{ status.due }}<small>due of {{ status.cards }}</small></div><div class="small muted">retention {{ status.retention }} · <a href="/review">review</a></div></div>
+  <div class="card"><div class="eyebrow">Work</div><div class="stat">{{ status.submissions }}<small>submissions</small></div><div class="small muted">{{ status.edge_notes }} edge notes recorded</div></div>
+  <div class="card"><div class="eyebrow">Anchors</div><div class="stat" style="font-size:1.1rem">{% if status.anchors %}{{ status.anchors|join(", ") }}{% else %}<span class="faint">chosen after gate 2</span>{% endif %}</div>
+    <form method="post" action="/anchors" class="actions" style="margin:.5rem 0 0"><input type="text" name="a1" placeholder="field" size="8"> <input type="text" name="a2" placeholder="field" size="8"> <button class="btn ghost sm">Set</button></form></div>
 </div>
-<h2>Modules</h2>
-<table>{% for m in phase.modules %}<tr><td><a href="/module/{{ m.id }}">{{ m.id }}</a></td><td>{{ m.title }}</td><td class="mute">{{ m.weeks }} wk</td><td><a href="/tutor/{{ m.id }}">tutor</a></td></tr>{% endfor %}</table>
+<h2>Modules in this phase</h2>
+<div class="card flat"><table><thead><tr><th>Module</th><th></th><th>Weeks</th><th></th></tr></thead><tbody>
+{% for m in phase.modules %}<tr><td><a href="/module/{{ m.id }}">{{ m.id }}</a></td><td>{{ m.title }}</td><td class="muted">{{ m.weeks }}</td><td><a href="/tutor/{{ m.id }}">tutor</a></td></tr>{% endfor %}
+</tbody></table></div>
 {% if gate %}
 <h2>{{ gate.title }}</h2>
-<p class="mute">{{ gate.description }}</p>
-<table>
+<p class="muted" style="max-width:70ch">{{ gate.description }}</p>
+<div class="card flat"><table><tbody>
 {% for e in exams %}
-<tr><td>{{ e.spec.title }}</td>
-<td>{% if e.passed %}<span class="good">passed</span>{% elif e.can %}
-  {% if e.spec.oral %}<a href="/oral/{{ e.spec.id }}">sit the oral</a>{% else %}<form method="post" action="/exam/{{ e.spec.id }}/start" style="display:inline"><button class="secondary">draw a fresh exam</button></form>{% endif %}
-  {% else %}<span class="mute">{{ e.why }}</span>{% endif %}</td>
-<td class="mute">{{ e.spec.duration_minutes }} min{% if e.spec.standard %} · {{ e.spec.standard }}{% endif %}</td></tr>
+<tr><td><strong>{{ e.spec.title }}</strong><div class="small faint">{{ e.spec.duration_minutes }} min{% if e.spec.standard %} · {{ e.spec.standard }}{% endif %}</div></td>
+<td style="text-align:right">{% if e.passed %}<span class="pill good">passed</span>{% elif e.can %}
+  {% if e.spec.oral %}<a class="btn secondary sm" href="/oral/{{ e.spec.id }}">Sit the oral</a>{% else %}<form class="inline" method="post" action="/exam/{{ e.spec.id }}/start"><button class="btn secondary sm">Draw a fresh exam</button></form>{% endif %}
+  {% else %}<span class="pill">{{ e.why }}</span>{% endif %}</td></tr>
 {% endfor %}
-</table>
-<form method="post" action="/advance"><button>Try to advance</button></form>
+</tbody></table></div>
+<form method="post" action="/advance" class="actions"><button class="btn">Try to advance</button></form>
 {% endif %}
 {% endblock %}
