@@ -6,6 +6,8 @@
 #   first time:  ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
 #   later:       ./deploy/azure.sh          (secrets stay as stored; set one to replace it)
 # Optional env: RG, LOCATION, APP, ENV_NAME, STORAGE, MINIMUM_MODEL, MINIMUM_LEARNER
+#   PERSIST=0   deploy without the Azure Files share (the learner database then lives in the
+#               container and is lost on restart; use only to get running while storage is sorted)
 #
 # Re-running the script updates the app in place.
 set -euo pipefail
@@ -31,6 +33,7 @@ ENV_NAME="${ENV_NAME:-minimum-env}"
 STORAGE="${STORAGE:-minimum$(echo "$RG" | tr -dc 'a-z0-9' | cut -c1-8)$RANDOM}"
 SHARE="learnerdata"
 MODEL="${MINIMUM_MODEL:-claude-opus-5-5}"
+PERSIST="${PERSIST:-1}"
 LEARNER="${MINIMUM_LEARNER:-me}"
 
 az extension add --name containerapp --upgrade --only-show-errors >/dev/null
@@ -61,6 +64,7 @@ else
   echo "   reusing existing environment in $LOCATION"
 fi
 
+if [ "$PERSIST" = "1" ]; then
 echo "== storage for the learner database"
 # Prefer the account the environment already references, so reruns never drift to another one.
 STORAGE_REF=$(az containerapp env storage show -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" --query properties.azureFile.accountName -o tsv 2>/dev/null || true)
@@ -80,6 +84,9 @@ echo "   using share $SHARE on storage account $STORAGE"
 az containerapp env storage set -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" \
   --azure-file-account-name "$STORAGE" --azure-file-account-key "$KEY" --azure-file-share-name "$SHARE" \
   --access-mode ReadWrite --only-show-errors >/dev/null
+else
+  echo "== storage: PERSIST=0, deploying WITHOUT the file share (data is lost on restart)"
+fi
 
 echo "== container registry"
 ACR=$(az acr list -g "$RG" --query "[0].name" -o tsv)
@@ -140,14 +147,15 @@ az containerapp update -g "$RG" -n "$APP" \
 # so patch the app definition with the standard library only (JSON is valid YAML).
 TMP=$(mktemp --suffix=.json)
 az containerapp show -g "$RG" -n "$APP" -o json > "$TMP"
-python3 - "$TMP" "$SHARE" <<'PY'
+python3 - "$TMP" "$SHARE" "$PERSIST" <<'PY'
 import json, sys
 path, share = sys.argv[1], sys.argv[2]
 doc = json.load(open(path))
 tpl = doc["properties"]["template"]
-tpl["volumes"] = [{"name": "data", "storageType": "AzureFile", "storageName": share}]
+persist = sys.argv[3] == "1"
+tpl["volumes"] = [{"name": "data", "storageType": "AzureFile", "storageName": share}] if persist else []
 for c in tpl["containers"]:
-    c["volumeMounts"] = [{"volumeName": "data", "mountPath": "/data"}]
+    c["volumeMounts"] = [{"volumeName": "data", "mountPath": "/data"}] if persist else []
 json.dump(doc, open(path, "w"))
 PY
 az containerapp update -g "$RG" -n "$APP" --yaml "$TMP" --only-show-errors >/dev/null
