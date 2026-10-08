@@ -8,7 +8,8 @@ COPY minimum ./minimum
 RUN pip install ".[web]"
 
 # The learner database lives here; mount a persistent volume at /data.
-ENV MINIMUM_DB=/data/learner.db PORT=8000
+ARG BUILD=dev
+ENV MINIMUM_DB=/data/learner.db PORT=8000 MINIMUM_BUILD=$BUILD
 RUN mkdir -p /data
 VOLUME ["/data"]
 EXPOSE 8000

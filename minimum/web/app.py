@@ -79,7 +79,7 @@ def create_app(
     # --- health and enrolment ------------------------------------------
     @app.get("/healthz")
     def healthz():
-        return {"ok": True, "course": bundle.course.id, "offline": offline}
+        return {"ok": True, "course": bundle.course.id, "offline": offline, "build": os.environ.get("MINIMUM_BUILD", "dev")}
 
     @app.get("/smoke")
     def smoke():

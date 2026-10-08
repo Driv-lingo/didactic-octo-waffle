@@ -78,10 +78,11 @@ ACR_SERVER=$(az acr show -n "$ACR" --query loginServer -o tsv)
 ACR_USER=$(az acr credential show -n "$ACR" --query username -o tsv)
 ACR_PASS=$(az acr credential show -n "$ACR" --query "passwords[0].value" -o tsv)
 
-TAG=$(date +%Y%m%d%H%M%S)
+BUILD=$(git rev-parse --short HEAD 2>/dev/null || echo manual)
+TAG="$(date +%Y%m%d%H%M%S)-$BUILD"
 IMAGE="$ACR_SERVER/minimum:$TAG"
-echo "== building $IMAGE in the cloud (a few minutes; build output follows)"
-az acr build -r "$ACR" -t "minimum:$TAG" . | grep -Ev '^\s*$|Pushed$|Preparing$|Waiting$|Retrying' || true
+echo "== building $IMAGE from commit $BUILD (a few minutes; build output follows)"
+az acr build -r "$ACR" -t "minimum:$TAG" --no-cache --build-arg "BUILD=$BUILD" . | grep -Ev '^\s*$|Pushed$|Preparing$|Waiting$|Retrying' || true
 
 echo "== deploying the app"
 APP_STATE=$(az containerapp show -g "$RG" -n "$APP" --query properties.provisioningState -o tsv 2>/dev/null || true)
@@ -127,6 +128,7 @@ rm -f "$TMP"
 
 URL="https://$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)"
 echo
-echo "Deployed. Open: $URL/?token=$MINIMUM_TOKEN"
+echo "Deployed commit $BUILD. Open: $URL/?token=$MINIMUM_TOKEN"
+echo "Check:         curl -s $URL/healthz   (the build field must read $BUILD)"
 echo "Health:        $URL/healthz"
 echo "Logs:          az containerapp logs show -g $RG -n $APP --follow"

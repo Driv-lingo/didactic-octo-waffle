@@ -6,7 +6,8 @@ from minimum.web.app import create_app
 def test_web_flow_offline(tmp_path):
     app = create_app(db=tmp_path / "w.db", learner="web", offline=True, token="")
     c = TestClient(app)
-    assert c.get("/healthz").json()["ok"]
+    hz = c.get("/healthz").json()
+    assert hz["ok"] and hz["build"]
     sm = c.get("/smoke").json()
     assert sm["ok"] is False and "offline" in sm["error"]
     r = c.get("/")
