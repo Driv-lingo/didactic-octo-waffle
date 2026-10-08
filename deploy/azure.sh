@@ -82,7 +82,10 @@ BUILD=$(git rev-parse --short HEAD 2>/dev/null || echo manual)
 TAG="$(date +%Y%m%d%H%M%S)-$BUILD"
 IMAGE="$ACR_SERVER/minimum:$TAG"
 echo "== building $IMAGE from commit $BUILD (a few minutes; build output follows)"
-az acr build -r "$ACR" -t "minimum:$TAG" --no-cache --build-arg "BUILD=$BUILD" . | grep -Ev '^\s*$|Pushed$|Preparing$|Waiting$|Retrying' || true
+az acr build -r "$ACR" -t "minimum:$TAG" --build-arg "BUILD=$BUILD" .
+if ! az acr repository show-tags -n "$ACR" --repository minimum -o tsv | grep -qx "$TAG"; then
+  echo "BUILD FAILED: tag $TAG is not in the registry. Not deploying. Read the build output above."; exit 1
+fi
 
 echo "== deploying the app"
 APP_STATE=$(az containerapp show -g "$RG" -n "$APP" --query properties.provisioningState -o tsv 2>/dev/null || true)
@@ -125,6 +128,19 @@ json.dump(doc, open(path, "w"))
 PY
 az containerapp update -g "$RG" -n "$APP" --yaml "$TMP" --only-show-errors >/dev/null
 rm -f "$TMP"
+
+echo "== waiting for the new revision to become ready"
+for i in $(seq 1 30); do
+  LATEST=$(az containerapp show -g "$RG" -n "$APP" --query properties.latestRevisionName -o tsv)
+  READY=$(az containerapp show -g "$RG" -n "$APP" --query properties.latestReadyRevisionName -o tsv)
+  [ "$LATEST" = "$READY" ] && break
+  sleep 10
+done
+if [ "$LATEST" != "$READY" ]; then
+  echo "DEPLOY FAILED: revision $LATEST never became ready; $READY is still serving. Recent system log:"
+  az containerapp logs show -g "$RG" -n "$APP" --type system --tail 40 2>/dev/null || true
+  exit 1
+fi
 
 URL="https://$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)"
 echo
