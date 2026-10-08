@@ -13,7 +13,7 @@ set -euo pipefail
 : "${MINIMUM_TOKEN:?set MINIMUM_TOKEN (the browser access token)}"
 
 RG="${RG:-minimum-rg}"
-LOCATION="${LOCATION:-eastus}"
+LOCATION="${LOCATION:-eastus2}"  # if a region reports AKSCapacityHeavyUsage, pick another: westus2, centralus, westeurope
 APP="${APP:-minimum}"
 ENV_NAME="${ENV_NAME:-minimum-env}"
 STORAGE="${STORAGE:-minimum$(echo "$RG" | tr -dc 'a-z0-9' | cut -c1-8)$RANDOM}"
@@ -25,8 +25,10 @@ az extension add --name containerapp --upgrade --only-show-errors >/dev/null
 az provider register --namespace Microsoft.App --only-show-errors >/dev/null
 az provider register --namespace Microsoft.OperationalInsights --only-show-errors >/dev/null
 
-echo "== resource group $RG in $LOCATION"
-az group create -n "$RG" -l "$LOCATION" --only-show-errors >/dev/null
+echo "== resource group $RG (resources go to $LOCATION)"
+if [ "$(az group exists -n "$RG")" != "true" ]; then
+  az group create -n "$RG" -l "$LOCATION" --only-show-errors >/dev/null
+fi
 
 echo "== container apps environment $ENV_NAME"
 az containerapp env show -g "$RG" -n "$ENV_NAME" --only-show-errors >/dev/null 2>&1 \
