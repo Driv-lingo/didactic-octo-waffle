@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ spec.title }} · attempt {{ att.id }}</h1>
+{% if results is none %}
+<p class="mute">Time allowed: {{ spec.duration_minutes }} minutes. Closed book. Started {{ att.started_at.strftime('%H:%M') }} UTC. Every problem counts; a blank scores zero.</p>
+<form method="post" action="/attempt/{{ att.id }}/submit">
+{% for p in probs %}
+<div class="card"><strong>{{ p.id }}</strong> <span class="pill">{{ p.max_score }} pts</span><pre>{{ p.statement }}</pre>
+<textarea name="ans_{{ p.id }}" placeholder="{% if p.kind.value == 'code' %}code{% else %}argument, then ANSWER: ...{% endif %}"></textarea></div>
+{% endfor %}
+<p><button>Submit the whole exam</button></p>
+</form>
+{% else %}
+<h2 class="{{ 'good' if att.passed else 'bad' }}">{{ 'PASS' if att.passed else 'FAIL' }} · {{ att.score }}/{{ att.max_score }}</h2>
+{% for s, g in results %}<div class="card"><strong><a href="/problem/{{ s.problem_id }}">{{ s.problem_id }}</a></strong>{% if g %} · {{ g.score }}/{{ g.max_score }}{% if not g.verified %} <span class="bad">unverified</span>{% endif %}<pre>{{ g.feedback }}</pre>{% else %} · <span class="mute">blank</span>{% endif %}</div>{% endfor %}
+<p><a href="/">Back</a></p>
+{% endif %}
+{% endblock %}

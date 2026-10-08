@@ -74,7 +74,7 @@ happens during sleep.
 Before enrolment: a two-hour written exam on algebra, basic calculus, logic, programming, and
 reading a technical paragraph for its claim and weakest point; then five observed days of the
 real schedule. Selection is for learning speed and honesty about what one does not know, not
-for prior knowledge. The engine ships this exam as `courses/science/exams/selection.yaml`.
+for prior knowledge. The engine ships this exam as `minimum/courses/science/exams/selection.yaml`.
 
 ## The faculty
 

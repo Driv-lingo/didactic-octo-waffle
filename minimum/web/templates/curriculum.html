@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block content %}
+<h1>Curriculum</h1>
+<p class="mute">Six modes of reasoning cover eight fields:</p>
+<ul>{% for k, v in course.modes.items() %}<li><strong>{{ k }}</strong>: {{ v }}</li>{% endfor %}</ul>
+{% for ph in course.phases %}
+<h2>{{ ph.id }} · {{ ph.title }} <span class="pill">{{ ph.weeks }} weeks</span></h2>
+<p class="mute">{{ ph.goal }}</p>
+<table>{% for m in ph.modules %}<tr><td><a href="/module/{{ m.id }}">{{ m.id }}</a></td><td>{{ m.title }}</td><td class="mute">{{ m.field }} · {{ m.mode }}</td><td class="mute">{{ counts[m.id] }} problems</td></tr>{% endfor %}</table>
+{% set g = course.gate_after(ph.id) %}{% if g %}<p><strong>{{ g.title }}:</strong> {{ g.description }}</p>{% endif %}
+{% endfor %}
+{% endblock %}

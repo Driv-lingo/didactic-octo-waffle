@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ course.title }}</h1>
+<p class="mute">{{ course.tagline }}</p>
+<p>About {{ course.total_hours }} hours over roughly {{ course.expected_months }} months at {{ course.weekly_hours }} hours a week. Read the rules. They do not change.</p>
+<ul>{% for r in course.rules %}<li>{{ r }}</li>{% endfor %}</ul>
+<form method="post" action="/enroll"><button>Enroll</button></form>
+{% endblock %}

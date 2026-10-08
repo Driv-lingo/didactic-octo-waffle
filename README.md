@@ -25,15 +25,47 @@ minimum/              the engine (course-agnostic)
   agents/             the seven faculty roles, their views, prompts, schemas
   orchestrator.py     wiring and the three rules no prompt can enforce
   cli.py              command-line front end
-courses/science/      the first course built on the engine
-  course.yaml         phases, modules, texts, concepts, gates, exams, rules
-  problems/*.yaml     the problem bank with reference solutions and rubrics
-  exams/selection.yaml  the fixed selection-week exam
-  labs/kit.yaml       the lab kit and protocols
+  web/                browser front end (FastAPI, server-rendered)
+  smoke.py            one real model call to verify a deployment
+  courses/science/    the first course built on the engine (shipped as package data)
+    course.yaml       phases, modules, texts, concepts, gates, exams, rules
+    problems/*.yaml   the problem bank with reference solutions and rubrics
+    exams/selection.yaml  the fixed selection-week exam
+    labs/kit.yaml     the lab kit and protocols
 tests/                engine tests and content self-checks
 ```
 
-## Install and run
+## Quickest path to working
+
+```
+pip install -e ".[web,dev]"
+export ANTHROPIC_API_KEY=sk-ant-...      # or: ant auth login
+minimum smoke                            # one real call: credentials, model, structured output
+MINIMUM_TOKEN=choose-a-secret minimum-web
+```
+
+Open http://localhost:8000/?token=choose-a-secret. Enroll, start a module, submit a problem,
+talk to the tutor. The web app and the CLI share the same engine and the same database.
+
+## Deploy to Azure
+
+`deploy/azure.sh` stands up Azure Container Apps with a persistent Azure Files share for the
+learner database, builds the image from source, and stores the API key and access token as
+secrets. It needs a logged-in `az` CLI and nothing else.
+
+```
+ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
+```
+
+It prints the URL when done. Re-running updates the app in place. The container also runs
+anywhere else that takes a Dockerfile; set `MINIMUM_DB` to a path on a persistent volume and
+`MINIMUM_TOKEN` to gate the browser.
+
+The model is served by the first-party Anthropic API. To serve it from Claude on Microsoft
+Foundry instead, swap the client construction in `minimum/llm.py` for the SDK's Foundry client;
+every feature the engine uses is supported there.
+
+## Command line
 
 ```
 pip install -e ".[dev]"
@@ -111,15 +143,18 @@ learner has already seen in that exam, and attempts are separated by a cooldown.
 
 ## Adding a course
 
-Create `courses/<id>/course.yaml` with the same shape, a `problems/` directory, and optionally
-`exams/` and `labs/`. Run `minimum --course courses/<id> validate`. The engine, the agents, and
+Create `minimum/courses/<id>/course.yaml` (or any directory, passed with `--course`) with the same shape, a `problems/` directory, and optionally
+`exams/` and `labs/`. Run `minimum --course minimum/courses/<id> validate`. The engine, the agents, and
 the CLI do not change. A language course would need audio in and out and a conversational
 examiner, which is the one seam the engine does not yet have.
 
 ## Status
 
 Built and tested: the engine, the faculty with isolation and verification, deterministic
-grading, mastery gates, retrieval, the CLI, and a 77-problem bank covering every module that
-feeds a gate. Not yet built: a web front end, a larger bank (a real gate needs hundreds of
-problems per phase so attempts stay fresh), audio for oral exams, and any run against a live
-model, which this environment could not do.
+grading, mastery gates, retrieval, the CLI, the web front end, the container, and a 77-problem
+bank covering every module that feeds a gate. Not yet done: a run against a live model (this
+build environment had no credentials; `minimum smoke` is the first thing to run), a larger
+bank (a real gate needs hundreds of problems per phase so attempts stay fresh), audio for oral
+exams, and multi-user accounts. The web app is single-learner behind one access token, and
+tutor and oral-exam sessions live in process memory, so a restart ends an oral exam in
+progress.

@@ -21,7 +21,7 @@ from minimum.orchestrator import Orchestrator
 from minimum.store import Store
 
 ROOT = Path(__file__).resolve().parent.parent
-COURSE = ROOT / "courses" / "science"
+COURSE = ROOT / "minimum" / "courses" / "science"
 
 
 @pytest.fixture(scope="session")

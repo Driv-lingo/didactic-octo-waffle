@@ -97,7 +97,7 @@ def _dt(s: str | None) -> datetime | None:
 class Store:
     def __init__(self, path: str | Path = ":memory:"):
         self.path = str(path)
-        self.conn = sqlite3.connect(self.path)
+        self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
 

@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ spec.title }}</h1>
+<h2 class="{{ 'good' if (turn.verdict or '')|lower == 'pass' else 'bad' }}">{{ (turn.verdict or 'fail')|upper }}</h2>
+<p><strong>Level reached:</strong> {{ turn.level_reached }}</p>
+<pre>{{ turn.assessment }}</pre>
+{% if turn.edge_notes %}<h3>Where it broke</h3><ul>{% for n in turn.edge_notes %}<li><strong>{{ n.concept }}</strong>: {{ n.note }}</li>{% endfor %}</ul>{% endif %}
+<p><a href="/">Back</a></p>
+{% endblock %}

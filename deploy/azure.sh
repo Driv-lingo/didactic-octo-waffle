@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Deploy the Minimum to Azure Container Apps with a persistent Azure Files share.
+#
+# Prerequisites: az CLI logged in (az login), Docker not required (ACA builds from source).
+# Usage:
+#   ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
+# Optional env: RG, LOCATION, APP, ENV_NAME, STORAGE, MINIMUM_MODEL, MINIMUM_LEARNER
+#
+# Re-running the script updates the app in place.
+set -euo pipefail
+
+: "${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY}"
+: "${MINIMUM_TOKEN:?set MINIMUM_TOKEN (the browser access token)}"
+
+RG="${RG:-minimum-rg}"
+LOCATION="${LOCATION:-eastus}"
+APP="${APP:-minimum}"
+ENV_NAME="${ENV_NAME:-minimum-env}"
+STORAGE="${STORAGE:-minimum$(echo "$RG" | tr -dc 'a-z0-9' | cut -c1-8)$RANDOM}"
+SHARE="learnerdata"
+MODEL="${MINIMUM_MODEL:-claude-opus-5-5}"
+LEARNER="${MINIMUM_LEARNER:-me}"
+
+az extension add --name containerapp --upgrade --only-show-errors >/dev/null
+az provider register --namespace Microsoft.App --only-show-errors >/dev/null
+az provider register --namespace Microsoft.OperationalInsights --only-show-errors >/dev/null
+
+echo "== resource group $RG in $LOCATION"
+az group create -n "$RG" -l "$LOCATION" --only-show-errors >/dev/null
+
+echo "== container apps environment $ENV_NAME"
+az containerapp env show -g "$RG" -n "$ENV_NAME" --only-show-errors >/dev/null 2>&1 \
+  || az containerapp env create -g "$RG" -n "$ENV_NAME" -l "$LOCATION" --only-show-errors >/dev/null
+
+echo "== storage for the learner database"
+EXISTING=$(az storage account list -g "$RG" --query "[?starts_with(name,'minimum')].name | [0]" -o tsv)
+if [ -n "$EXISTING" ]; then STORAGE="$EXISTING"; else
+  az storage account create -g "$RG" -n "$STORAGE" -l "$LOCATION" --sku Standard_LRS --kind StorageV2 --only-show-errors >/dev/null
+fi
+KEY=$(az storage account keys list -g "$RG" -n "$STORAGE" --query "[0].value" -o tsv)
+az storage share-rm create --storage-account "$STORAGE" --name "$SHARE" --quota 5 --only-show-errors >/dev/null 2>&1 || true
+az containerapp env storage set -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" \
+  --azure-file-account-name "$STORAGE" --azure-file-account-key "$KEY" --azure-file-share-name "$SHARE" \
+  --access-mode ReadWrite --only-show-errors >/dev/null
+
+echo "== build and deploy the app from source"
+az containerapp up -g "$RG" -n "$APP" --environment "$ENV_NAME" --source . --ingress external --target-port 8000 \
+  --env-vars "MINIMUM_DB=/data/learner.db" "MINIMUM_MODEL=$MODEL" "MINIMUM_LEARNER=$LEARNER" --only-show-errors >/dev/null
+
+echo "== secrets and volume"
+az containerapp secret set -g "$RG" -n "$APP" --secrets "anthropic-api-key=$ANTHROPIC_API_KEY" "minimum-token=$MINIMUM_TOKEN" --only-show-errors >/dev/null
+az containerapp update -g "$RG" -n "$APP" --min-replicas 1 --max-replicas 1 \
+  --set-env-vars "ANTHROPIC_API_KEY=secretref:anthropic-api-key" "MINIMUM_TOKEN=secretref:minimum-token" --only-show-errors >/dev/null
+
+# Mount the share at /data. The CLI exposes volumes only through YAML, so patch the app definition.
+TMP=$(mktemp)
+az containerapp show -g "$RG" -n "$APP" -o yaml > "$TMP"
+python3 - "$TMP" "$SHARE" <<'PY'
+import sys, yaml
+path, share = sys.argv[1], sys.argv[2]
+doc = yaml.safe_load(open(path))
+tpl = doc["properties"]["template"]
+tpl["volumes"] = [{"name": "data", "storageType": "AzureFile", "storageName": share}]
+for c in tpl["containers"]:
+    c["volumeMounts"] = [{"volumeName": "data", "mountPath": "/data"}]
+yaml.safe_dump(doc, open(path, "w"))
+PY
+az containerapp update -g "$RG" -n "$APP" --yaml "$TMP" --only-show-errors >/dev/null
+rm -f "$TMP"
+
+URL="https://$(az containerapp show -g "$RG" -n "$APP" --query properties.configuration.ingress.fqdn -o tsv)"
+echo
+echo "Deployed. Open: $URL/?token=$MINIMUM_TOKEN"
+echo "Health:        $URL/healthz"
+echo "Logs:          az containerapp logs show -g $RG -n $APP --follow"

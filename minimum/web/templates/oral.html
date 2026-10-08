@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ spec.title }}</h1>
+<p class="mute">Standard: {{ spec.standard }}. Question {{ sess.asked }} of at most {{ spec.max_questions }}. The examiner does not confirm answers until the end.</p>
+<div class="chat">{% for h in sess.history %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
+<form method="post" action="/oral/{{ spec.id }}"><textarea name="answer" autofocus></textarea><p><button>Answer</button></p></form>
+{% endblock %}

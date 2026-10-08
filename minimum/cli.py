@@ -20,7 +20,7 @@ from .llm import default_client
 from .orchestrator import Orchestrator, SolutionLocked
 from .store import Store
 
-DEFAULT_COURSE = Path(__file__).resolve().parent.parent / "courses" / "science"
+DEFAULT_COURSE = Path(__file__).resolve().parent / "courses" / "science"
 
 
 class Ctx:
@@ -63,6 +63,27 @@ def validate(c: Ctx) -> None:
             click.echo(f"ERROR {e}")
         sys.exit(1)
     click.echo("content OK")
+
+
+@main.command()
+def smoke() -> None:
+    """Make one real model call to verify credentials and structured outputs."""
+    import anthropic
+
+    from .smoke import run_smoke
+
+    try:
+        result = run_smoke()
+    except anthropic.AuthenticationError:
+        click.echo("No valid credentials. Set ANTHROPIC_API_KEY, or run `ant auth login`.")
+        sys.exit(2)
+    except anthropic.APIConnectionError as exc:
+        click.echo(f"Could not reach the API: {exc}")
+        sys.exit(2)
+    click.echo(json.dumps(result, indent=2))
+    if not result["answer_correct"]:
+        click.echo("The model answered, but the answer was wrong. Check MINIMUM_MODEL.")
+        sys.exit(1)
 
 
 @main.command()

@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<h1>Lab kit</h1>
+{% if kit %}<p class="mute">About ${{ kit.budget_usd }} in total.</p>
+<table>{% for i in kit['items'] %}<tr><td>${{ i.approx_usd }}</td><td>{{ i.item }}</td><td class="mute">{{ i.used_in|join(', ') }}</td></tr>{% endfor %}</table>
+<h2>Protocols</h2>{% for p in kit.protocols %}<div class="card"><strong>{{ p.title }}</strong> <span class="pill">{{ p.module }}</span><br><strong>Measure:</strong> {{ p.measure }}<br><strong>Model:</strong> {{ p.model }}<br><strong>Report:</strong> {{ p.report }}</div>{% endfor %}
+{% else %}<p>No kit for this course.</p>{% endif %}
+{% endblock %}

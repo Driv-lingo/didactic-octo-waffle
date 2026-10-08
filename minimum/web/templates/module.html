@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ m.title }}</h1>
+<p>{{ m.summary }}</p>
+<div class="row">
+  <form method="post" action="/module/{{ m.id }}/start"><button {% if started %}class="secondary"{% endif %}>{% if started %}Started{% else %}Start module{% endif %}</button></form>
+  <a href="/tutor/{{ m.id }}"><button class="secondary" type="button">Talk to the tutor</button></a>
+</div>
+<h3>Outcomes</h3><ul>{% for o in m.outcomes %}<li>{{ o }}</li>{% endfor %}</ul>
+<h3>Texts</h3><ul>{% for t in m.texts %}<li>{{ t.title }} ({{ t.author }}){% if t.open_access and t.url %} · <a href="{{ t.url }}">open access</a>{% endif %}{% if t.note %} <span class="mute">— {{ t.note }}</span>{% endif %}</li>{% endfor %}</ul>
+{% if m.project %}<h3>Project</h3><p>{{ m.project }}</p>{% endif %}
+<h3>Problems</h3>
+<table>{% for p in probs %}<tr><td>{% if p.id in done %}<span class="good">✓</span>{% endif %}</td><td><a href="/problem/{{ p.id }}">{{ p.id }}</a></td><td class="mute">d{{ p.difficulty }} · {{ p.kind.value }} · {{ p.max_score }} pts</td><td>{{ p.statement.strip().splitlines()[0][:90] }}</td></tr>{% endfor %}</table>
+{% endblock %}

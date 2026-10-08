@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}
+<h1>Retrieval</h1>
+{% if card %}
+<p class="mute">{{ remaining }} due. Answer out loud or on paper first. Then grade yourself: 0 to 2 forgot, 3 hard, 4 good, 5 easy.</p>
+<div class="card"><strong>{{ card.module }}</strong><pre>{{ card.prompt }}</pre></div>
+<form method="post" action="/review/{{ card.card_id }}">{% for g in range(6) %}<button name="grade" value="{{ g }}" {% if g < 3 %}class="secondary"{% endif %}>{{ g }}</button> {% endfor %}</form>
+{% else %}<p>Nothing due. <a href="/">Back</a></p>{% endif %}
+{% endblock %}

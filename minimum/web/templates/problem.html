@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ p.id }} <span class="pill">d{{ p.difficulty }}</span> <span class="pill">{{ p.kind.value }}</span> <span class="pill">{{ p.max_score }} pts</span></h1>
+<pre>{{ p.statement }}</pre>
+{% if p.grading_rubric %}<p class="mute">Graded on:</p><ul>{% for r in p.grading_rubric %}<li>[{{ r.points }}] {{ r.criterion }}</li>{% endfor %}</ul>{% endif %}
+<p><a href="/tutor/{{ p.module }}?problem={{ p.id }}">Discuss with the tutor</a> <span class="mute">(the solution stays locked)</span></p>
+<form method="post" action="/problem/{{ p.id }}/submit">
+<textarea name="content" placeholder="{% if p.kind.value == 'code' %}Paste your code.{% else %}Show the argument. End with a line: ANSWER: ...{% endif %}"></textarea>
+<p><button>Submit for grading</button></p>
+</form>
+{% for s, g in grades|reverse %}
+<div class="card">
+<strong>Attempt {{ loop.revindex }}</strong> <span class="mute">{{ s.submitted_at.strftime('%Y-%m-%d %H:%M') }}</span>
+{% if g %}<br><strong>{{ g.score }}/{{ g.max_score }}</strong>{% if not g.verified %} <span class="bad">unverified, provisional</span>{% endif %}
+<ul>{% for b in g.rubric_breakdown %}<li>[{{ b.points_awarded }}/{{ b.points_possible }}] {{ b.criterion }} <span class="mute">— {{ b.justification }}</span></li>{% endfor %}</ul>
+<pre>{{ g.feedback }}</pre>{% if g.verifier_notes %}<p class="mute">Verifier: {{ g.verifier_notes }}</p>{% endif %}
+{% else %}<p class="mute">not graded</p>{% endif %}
+</div>
+{% endfor %}
+{% if solution %}<h3>Reference solution</h3><pre>{{ solution }}</pre>{% elif grades %}{% else %}<p class="mute">Reference solution unlocks after your first submission.</p>{% endif %}
+{% endblock %}

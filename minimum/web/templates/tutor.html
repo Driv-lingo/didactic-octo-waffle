@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block content %}
+<h1>Tutor · {{ m.title }}</h1>
+{% if problem %}<p class="mute">Discussing <a href="/problem/{{ problem }}">{{ problem }}</a>. The tutor will not solve it for you.</p>{% endif %}
+<div class="chat">{% for h in history %}<div class="{{ 'u' if h.role == 'user' else 'a' }}">{{ h.content }}</div>{% endfor %}</div>
+<form method="post" action="/tutor/{{ m.id }}">
+<input type="hidden" name="problem" value="{{ problem or '' }}">
+<textarea name="message" style="min-height:5rem" autofocus placeholder="Ask, or state what you think is true."></textarea>
+<p><button>Send</button></p>
+</form>
+{% endblock %}

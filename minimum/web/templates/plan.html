@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}
+<h1>Today</h1>
+<p>{{ plan.message }}</p>
+<table>{% for b in plan.blocks %}<tr><td>{{ b.minutes }} min</td><td><strong>{{ b.block }}</strong></td><td>{{ b.task }}<br><span class="mute">{{ b.why }}</span></td></tr>{% endfor %}</table>
+{% if plan.warnings %}<h3>Warnings</h3><ul>{% for w in plan.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+<p>Drift risk: <strong>{{ plan.drift_risk }}</strong></p>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block content %}
+<h1>{{ phase.id }} · {{ phase.title }}</h1>
+<p class="mute">{{ phase.goal }}</p>
+<div class="row">
+  <div class="card" style="flex:1 1 14rem"><strong>Retrieval</strong><br>{{ status.due }} cards due of {{ status.cards }}<br>retention {{ status.retention }}<br><a href="/review">Review now</a></div>
+  <div class="card" style="flex:1 1 14rem"><strong>Work</strong><br>{{ status.submissions }} submissions<br>{{ status.edge_notes }} edge notes recorded<br><a href="/plan">Today's plan</a></div>
+  <div class="card" style="flex:1 1 14rem"><strong>Anchors</strong><br>{% if status.anchors %}{{ status.anchors|join(", ") }}{% else %}<span class="mute">not chosen (after gate 2)</span>{% endif %}
+    <form method="post" action="/anchors" style="margin-top:.4rem"><input type="text" name="a1" placeholder="field" size="9"> <input type="text" name="a2" placeholder="field" size="9"> <button class="secondary">Set</button></form></div>
+</div>
+<h2>Modules</h2>
+<table>{% for m in phase.modules %}<tr><td><a href="/module/{{ m.id }}">{{ m.id }}</a></td><td>{{ m.title }}</td><td class="mute">{{ m.weeks }} wk</td><td><a href="/tutor/{{ m.id }}">tutor</a></td></tr>{% endfor %}</table>
+{% if gate %}
+<h2>{{ gate.title }}</h2>
+<p class="mute">{{ gate.description }}</p>
+<table>
+{% for e in exams %}
+<tr><td>{{ e.spec.title }}</td>
+<td>{% if e.passed %}<span class="good">passed</span>{% elif e.can %}
+  {% if e.spec.oral %}<a href="/oral/{{ e.spec.id }}">sit the oral</a>{% else %}<form method="post" action="/exam/{{ e.spec.id }}/start" style="display:inline"><button class="secondary">draw a fresh exam</button></form>{% endif %}
+  {% else %}<span class="mute">{{ e.why }}</span>{% endif %}</td>
+<td class="mute">{{ e.spec.duration_minutes }} min{% if e.spec.standard %} · {{ e.spec.standard }}{% endif %}</td></tr>
+{% endfor %}
+</table>
+<form method="post" action="/advance"><button>Try to advance</button></form>
+{% endif %}
+{% endblock %}
