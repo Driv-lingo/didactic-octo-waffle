@@ -22,8 +22,13 @@ MODEL="${MINIMUM_MODEL:-claude-opus-5-5}"
 LEARNER="${MINIMUM_LEARNER:-me}"
 
 az extension add --name containerapp --upgrade --only-show-errors >/dev/null
-az provider register --namespace Microsoft.App --only-show-errors >/dev/null
-az provider register --namespace Microsoft.OperationalInsights --only-show-errors >/dev/null
+
+echo "== registering resource providers (a fresh subscription reports 'SubscriptionNotFound' until these are done)"
+for ns in Microsoft.App Microsoft.OperationalInsights Microsoft.Storage Microsoft.ContainerRegistry; do
+  if [ "$(az provider show -n "$ns" --query registrationState -o tsv 2>/dev/null)" != "Registered" ]; then
+    az provider register --namespace "$ns" --wait --only-show-errors >/dev/null
+  fi
+done
 
 echo "== resource group $RG (resources go to $LOCATION)"
 if [ "$(az group exists -n "$RG")" != "true" ]; then
