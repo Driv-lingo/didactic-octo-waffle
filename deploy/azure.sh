@@ -11,6 +11,13 @@ set -euo pipefail
 
 : "${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY}"
 : "${MINIMUM_TOKEN:?set MINIMUM_TOKEN (the browser access token)}"
+case "$ANTHROPIC_API_KEY" in
+  sk-ant-??????????*) ;;
+  *) echo "ANTHROPIC_API_KEY does not look like a real key (expected sk-ant-... followed by many characters). Get one at https://console.anthropic.com/settings/keys"; exit 1 ;;
+esac
+if [ "${#MINIMUM_TOKEN}" -lt 16 ] || [ "$MINIMUM_TOKEN" = "..." ]; then
+  echo "MINIMUM_TOKEN must be a real secret of at least 16 characters. Make one with: export MINIMUM_TOKEN=\$(openssl rand -hex 24)"; exit 1
+fi
 
 RG="${RG:-minimum-rg}"
 LOCATION="${LOCATION:-eastus2}"  # if a region reports AKSCapacityHeavyUsage, pick another: westus2, centralus, westeurope
@@ -36,8 +43,18 @@ if [ "$(az group exists -n "$RG")" != "true" ]; then
 fi
 
 echo "== container apps environment $ENV_NAME"
-az containerapp env show -g "$RG" -n "$ENV_NAME" --only-show-errors >/dev/null 2>&1 \
-  || az containerapp env create -g "$RG" -n "$ENV_NAME" -l "$LOCATION" --only-show-errors >/dev/null
+ENV_STATE=$(az containerapp env show -g "$RG" -n "$ENV_NAME" --query properties.provisioningState -o tsv 2>/dev/null || true)
+if [ -n "$ENV_STATE" ] && [ "$ENV_STATE" != "Succeeded" ]; then
+  echo "   existing environment is in state '$ENV_STATE'; deleting it and recreating in $LOCATION"
+  az containerapp env delete -g "$RG" -n "$ENV_NAME" --yes --only-show-errors >/dev/null || true
+  ENV_STATE=""
+fi
+if [ -z "$ENV_STATE" ]; then
+  az containerapp env create -g "$RG" -n "$ENV_NAME" -l "$LOCATION" --only-show-errors >/dev/null
+else
+  LOCATION=$(az containerapp env show -g "$RG" -n "$ENV_NAME" --query location -o tsv | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+  echo "   reusing existing environment in $LOCATION"
+fi
 
 echo "== storage for the learner database"
 EXISTING=$(az storage account list -g "$RG" --query "[?starts_with(name,'minimum')].name | [0]" -o tsv)
