@@ -49,9 +49,10 @@ talk to the tutor. The web app and the CLI share the same engine and the same da
 
 ## Deploy to Azure
 
-`deploy/azure.sh` stands up Azure Container Apps with a persistent Azure Files share for the
-learner database, builds the image from source, and stores the API key and access token as
-secrets. It needs a logged-in `az` CLI and nothing else.
+`deploy/azure.sh` stands up Azure Container Apps, builds the image in Azure Container Registry,
+stores the API key and access token as secrets, and keeps the learner database safe as a copy in
+Azure Blob Storage: the app restores it on startup and saves a snapshot after every write. It
+needs a logged-in `az` CLI and nothing else. Reruns keep the stored secrets.
 
 ```
 ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
@@ -59,7 +60,8 @@ ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.s
 
 It prints the URL when done. Open `<url>/smoke` (after logging in with the token) to make one
 real model call and confirm the faculty works. Re-running the script updates the app in place. The container also runs
-anywhere else that takes a Dockerfile; set `MINIMUM_DB` to a path on a persistent volume and
+anywhere else that takes a Dockerfile; set `MINIMUM_DB` to a path on a persistent volume, or set
+`MINIMUM_BLOB_CONNECTION` to an Azure Storage connection string for the blob copy, and
 `MINIMUM_TOKEN` to gate the browser.
 
 The model is served by the first-party Anthropic API. To serve it from Claude on Microsoft

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
@@ -12,6 +13,7 @@ from ..content import load_course
 from ..gates import GateError, can_attempt
 from ..llm import default_client
 from ..orchestrator import Orchestrator, OralSession, SolutionLocked
+from ..persist import BlobSync, blob_sync_from_env
 from ..store import Store
 
 HERE = Path(__file__).resolve().parent
@@ -51,6 +53,7 @@ def create_app(
     learner: str | None = None,
     offline: bool | None = None,
     token: str | None = None,
+    blob_sync: BlobSync | None = None,
 ) -> FastAPI:
     course = Path(course or os.environ.get("MINIMUM_COURSE", DEFAULT_COURSE))
     db = Path(db or os.environ.get("MINIMUM_DB", "data/learner.db"))
@@ -61,9 +64,20 @@ def create_app(
 
     bundle = load_course(course)
     db.parent.mkdir(parents=True, exist_ok=True)
-    orch = Orchestrator(bundle, Store(db), default_client(offline))
+    sync = blob_sync if blob_sync is not None else blob_sync_from_env(db)
+    restored = sync.restore() if sync is not None else False
+    store = Store(db)
+    if sync is not None:
+        sync.attach(store)
+    orch = Orchestrator(bundle, store, default_client(offline))
 
-    app = FastAPI(title=bundle.course.title)
+    @asynccontextmanager
+    async def lifespan(_app):
+        yield
+        if sync is not None:
+            sync.flush()
+
+    app = FastAPI(title=bundle.course.title, lifespan=lifespan)
     if token:
         app.add_middleware(TokenAuth, token=token)
     templates = Jinja2Templates(directory=str(HERE / "templates"))
@@ -79,7 +93,8 @@ def create_app(
     # --- health and enrolment ------------------------------------------
     @app.get("/healthz")
     def healthz():
-        return {"ok": True, "course": bundle.course.id, "offline": offline, "build": os.environ.get("MINIMUM_BUILD", "dev")}
+        persistence = {"mode": "blob", "restored": restored, "uploads": sync.uploads, "last_error": sync.last_error} if sync is not None else {"mode": "local-only"}
+        return {"ok": True, "course": bundle.course.id, "offline": offline, "build": os.environ.get("MINIMUM_BUILD", "dev"), "persistence": persistence}
 
     @app.get("/smoke")
     def smoke():

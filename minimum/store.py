@@ -100,9 +100,24 @@ class Store:
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(SCHEMA)
+        self.on_commit = None  # optional callback, invoked after every commit
 
     def close(self) -> None:
         self.conn.close()
+
+    def _commit(self) -> None:
+        self.conn.commit()
+        if self.on_commit is not None:
+            self.on_commit()
+
+    def snapshot(self, dest_path: str | Path) -> None:
+        """Write a consistent copy of the database to dest_path (SQLite backup API)."""
+        dest = sqlite3.connect(str(dest_path))
+        try:
+            with dest:
+                self.conn.backup(dest)
+        finally:
+            dest.close()
 
     # --- learner --------------------------------------------------------
     def create_learner(self, name: str, course_id: str, first_phase: str) -> None:
@@ -110,7 +125,7 @@ class Store:
             "INSERT INTO learner(name, course_id, started_at, current_phase) VALUES (?,?,?,?)",
             (name, course_id, _iso(_now()), first_phase),
         )
-        self.conn.commit()
+        self._commit()
 
     def learner(self, name: str) -> dict | None:
         row = self.conn.execute("SELECT * FROM learner WHERE name=?", (name,)).fetchone()
@@ -123,13 +138,13 @@ class Store:
 
     def set_phase(self, name: str, phase_id: str) -> None:
         self.conn.execute("UPDATE learner SET current_phase=? WHERE name=?", (phase_id, name))
-        self.conn.commit()
+        self._commit()
 
     def set_anchors(self, name: str, anchors: list[str]) -> None:
         self.conn.execute(
             "UPDATE learner SET anchors=? WHERE name=?", (json.dumps(anchors), name)
         )
-        self.conn.commit()
+        self._commit()
 
     # --- submissions and grades ------------------------------------------
     def add_submission(self, sub: Submission) -> int:
@@ -138,7 +153,7 @@ class Store:
             " VALUES (?,?,?,?,?)",
             (sub.learner, sub.problem_id, sub.content, _iso(sub.submitted_at), sub.exam_attempt_id),
         )
-        self.conn.commit()
+        self._commit()
         return int(cur.lastrowid)
 
     def submissions(self, learner: str, problem_id: str | None = None) -> list[Submission]:
@@ -182,7 +197,7 @@ class Store:
                 _iso(g.graded_at),
             ),
         )
-        self.conn.commit()
+        self._commit()
 
     def grade(self, submission_id: int) -> Grade | None:
         r = self.conn.execute("SELECT * FROM grade WHERE submission_id=?", (submission_id,)).fetchone()
@@ -215,7 +230,7 @@ class Store:
             "INSERT INTO exam_attempt(learner, exam_id, problem_ids, started_at) VALUES (?,?,?,?)",
             (att.learner, att.exam_id, json.dumps(att.problem_ids), _iso(att.started_at)),
         )
-        self.conn.commit()
+        self._commit()
         return int(cur.lastrowid)
 
     def finish_exam(self, attempt_id: int, score: float, max_score: float, passed: bool) -> None:
@@ -223,7 +238,7 @@ class Store:
             "UPDATE exam_attempt SET finished_at=?, score=?, max_score=?, passed=? WHERE id=?",
             (_iso(_now()), score, max_score, int(passed), attempt_id),
         )
-        self.conn.commit()
+        self._commit()
 
     def exam_attempts(self, learner: str, exam_id: str | None = None) -> list[ExamAttempt]:
         q = "SELECT * FROM exam_attempt WHERE learner=?"
@@ -256,7 +271,7 @@ class Store:
             "INSERT INTO edge_note(learner, module, concept, note, source, created_at) VALUES (?,?,?,?,?,?)",
             (n.learner, n.module, n.concept, n.note, n.source, _iso(n.created_at)),
         )
-        self.conn.commit()
+        self._commit()
 
     def edge_notes(self, learner: str, module: str | None = None, sources: tuple[str, ...] | None = None) -> list[EdgeNote]:
         q = "SELECT * FROM edge_note WHERE learner=?"
@@ -296,7 +311,7 @@ class Store:
                 card.get("last_grade"),
             ),
         )
-        self.conn.commit()
+        self._commit()
 
     def card(self, learner: str, card_id: str) -> dict | None:
         r = self.conn.execute(
@@ -326,7 +341,7 @@ class Store:
             "INSERT INTO event(learner, kind, payload, at) VALUES (?,?,?,?)",
             (learner, kind, json.dumps(payload, default=str), _iso(_now())),
         )
-        self.conn.commit()
+        self._commit()
 
     def events(self, learner: str, kind: str | None = None, limit: int = 100) -> list[dict]:
         q = "SELECT * FROM event WHERE learner=?"

@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Deploy the Minimum to Azure Container Apps with a persistent Azure Files share.
+# Deploy the Minimum to Azure Container Apps. The learner database is kept safe as a blob copy.
 #
 # Prerequisites: az CLI logged in (az login). Docker is not required; the image is built in Azure Container Registry.
 # Usage:
 #   first time:  ANTHROPIC_API_KEY=sk-ant-... MINIMUM_TOKEN=choose-a-long-secret ./deploy/azure.sh
 #   later:       ./deploy/azure.sh          (secrets stay as stored; set one to replace it)
 # Optional env: RG, LOCATION, APP, ENV_NAME, STORAGE, MINIMUM_MODEL, MINIMUM_LEARNER
-#   PERSIST=0   deploy without the Azure Files share (the learner database then lives in the
-#               container and is lost on restart; use only to get running while storage is sorted)
+#   PERSIST=0   skip the blob copy of the learner database (data is then lost on restart)
 #
 # Re-running the script updates the app in place.
 set -euo pipefail
@@ -31,7 +30,7 @@ LOCATION="${LOCATION:-eastus2}"  # if a region reports AKSCapacityHeavyUsage, pi
 APP="${APP:-minimum}"
 ENV_NAME="${ENV_NAME:-minimum-env}"
 STORAGE="${STORAGE:-minimum$(echo "$RG" | tr -dc 'a-z0-9' | cut -c1-8)$RANDOM}"
-SHARE="learnerdata"
+SHARE="learnerdata"  # blob container name
 MODEL="${MINIMUM_MODEL:-claude-opus-5-5}"
 PERSIST="${PERSIST:-1}"
 LEARNER="${MINIMUM_LEARNER:-me}"
@@ -65,27 +64,17 @@ else
 fi
 
 if [ "$PERSIST" = "1" ]; then
-echo "== storage for the learner database"
-# Prefer the account the environment already references, so reruns never drift to another one.
-STORAGE_REF=$(az containerapp env storage show -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" --query properties.azureFile.accountName -o tsv 2>/dev/null || true)
+echo "== storage for the learner database (blob copy, restored on start, saved after every write)"
 EXISTING=$(az storage account list -g "$RG" --query "[?starts_with(name,'minimum')].name | [0]" -o tsv)
-if [ -n "$STORAGE_REF" ]; then STORAGE="$STORAGE_REF"; elif [ -n "$EXISTING" ]; then STORAGE="$EXISTING"; else
+if [ -n "$EXISTING" ]; then STORAGE="$EXISTING"; else
   az storage account create -g "$RG" -n "$STORAGE" -l "$LOCATION" --sku Standard_LRS --kind StorageV2 --only-show-errors >/dev/null
 fi
-KEY=$(az storage account keys list -g "$RG" -n "$STORAGE" --query "[0].value" -o tsv)
-if [ "$(az storage share-rm exists -g "$RG" --storage-account "$STORAGE" --name "$SHARE" --query exists -o tsv 2>/dev/null)" != "true" ]; then
-  echo "   creating file share $SHARE on $STORAGE"
-  az storage share-rm create -g "$RG" --storage-account "$STORAGE" --name "$SHARE" --quota 5 --only-show-errors >/dev/null
-fi
-if [ "$(az storage share-rm exists -g "$RG" --storage-account "$STORAGE" --name "$SHARE" --query exists -o tsv)" != "true" ]; then
-  echo "STORAGE FAILED: file share $SHARE does not exist on $STORAGE and could not be created."; exit 1
-fi
-echo "   using share $SHARE on storage account $STORAGE"
-az containerapp env storage set -g "$RG" -n "$ENV_NAME" --storage-name "$SHARE" \
-  --azure-file-account-name "$STORAGE" --azure-file-account-key "$KEY" --azure-file-share-name "$SHARE" \
-  --access-mode ReadWrite --only-show-errors >/dev/null
+STORAGE_CONN=$(az storage account show-connection-string -g "$RG" -n "$STORAGE" --query connectionString -o tsv)
+az storage container create --name "$SHARE" --connection-string "$STORAGE_CONN" --only-show-errors >/dev/null
+echo "   using blob container $SHARE on storage account $STORAGE"
 else
-  echo "== storage: PERSIST=0, deploying WITHOUT the file share (data is lost on restart)"
+  STORAGE_CONN=""
+  echo "== storage: PERSIST=0, no blob copy (data is lost on restart)"
 fi
 
 echo "== container registry"
@@ -128,37 +117,43 @@ else
     --only-show-errors >/dev/null
 fi
 
-echo "== secrets and volume"
+echo "== secrets"
 HAVE=$(az containerapp secret list -g "$RG" -n "$APP" --query "[].name" -o tsv 2>/dev/null | tr '\n' ' ')
 SECRETS=()
 if [ -n "$ANTHROPIC_API_KEY" ]; then SECRETS+=("anthropic-api-key=$ANTHROPIC_API_KEY"); fi
 if [ -n "$MINIMUM_TOKEN" ]; then SECRETS+=("minimum-token=$MINIMUM_TOKEN"); fi
+if [ -n "$STORAGE_CONN" ]; then SECRETS+=("storage-connection=$STORAGE_CONN"); fi
 case " $HAVE " in *" anthropic-api-key "*) ;; *) [ -n "$ANTHROPIC_API_KEY" ] || { echo "First deploy needs ANTHROPIC_API_KEY set."; exit 1; } ;; esac
 case " $HAVE " in *" minimum-token "*) ;; *) [ -n "$MINIMUM_TOKEN" ] || { echo "First deploy needs MINIMUM_TOKEN set (export MINIMUM_TOKEN=\$(openssl rand -hex 24))."; exit 1; } ;; esac
 if [ "${#SECRETS[@]}" -gt 0 ]; then
   az containerapp secret set -g "$RG" -n "$APP" --secrets "${SECRETS[@]}" --only-show-errors >/dev/null
-else
-  echo "   keeping the stored API key and access token"
 fi
-az containerapp update -g "$RG" -n "$APP" \
-  --set-env-vars "ANTHROPIC_API_KEY=secretref:anthropic-api-key" "MINIMUM_TOKEN=secretref:minimum-token" --only-show-errors >/dev/null
+[ -n "$ANTHROPIC_API_KEY" ] || echo "   keeping the stored API key"
+[ -n "$MINIMUM_TOKEN" ] || echo "   keeping the stored access token"
+ENVVARS=("ANTHROPIC_API_KEY=secretref:anthropic-api-key" "MINIMUM_TOKEN=secretref:minimum-token")
+if [ -n "$STORAGE_CONN" ]; then
+  ENVVARS+=("MINIMUM_BLOB_CONNECTION=secretref:storage-connection" "MINIMUM_BLOB_CONTAINER=$SHARE")
+fi
+az containerapp update -g "$RG" -n "$APP" --set-env-vars "${ENVVARS[@]}" --only-show-errors >/dev/null
 
-# Mount the share at /data. The CLI exposes volumes only through a YAML/JSON app definition,
-# so patch the app definition with the standard library only (JSON is valid YAML).
+# Remove any file-share volume left from earlier versions of this script; the blob copy replaces it.
 TMP=$(mktemp --suffix=.json)
 az containerapp show -g "$RG" -n "$APP" -o json > "$TMP"
-python3 - "$TMP" "$SHARE" "$PERSIST" <<'PY'
+if python3 - "$TMP" <<'PY'
 import json, sys
-path, share = sys.argv[1], sys.argv[2]
-doc = json.load(open(path))
+doc = json.load(open(sys.argv[1]))
 tpl = doc["properties"]["template"]
-persist = sys.argv[3] == "1"
-tpl["volumes"] = [{"name": "data", "storageType": "AzureFile", "storageName": share}] if persist else []
+had = bool(tpl.get("volumes")) or any(c.get("volumeMounts") for c in tpl["containers"])
+tpl["volumes"] = []
 for c in tpl["containers"]:
-    c["volumeMounts"] = [{"volumeName": "data", "mountPath": "/data"}] if persist else []
-json.dump(doc, open(path, "w"))
+    c["volumeMounts"] = []
+json.dump(doc, open(sys.argv[1], "w"))
+sys.exit(0 if had else 1)
 PY
-az containerapp update -g "$RG" -n "$APP" --yaml "$TMP" --only-show-errors >/dev/null
+then
+  echo "   removing the old file-share volume"
+  az containerapp update -g "$RG" -n "$APP" --yaml "$TMP" --only-show-errors >/dev/null
+fi
 rm -f "$TMP"
 
 echo "== waiting for the new revision to become ready"
